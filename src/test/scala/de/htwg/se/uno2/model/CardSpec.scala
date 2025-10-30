@@ -9,9 +9,15 @@ class CardSpec extends AnyWordSpec {
 
     "be playable if colors match" in {
       val top = Card(Color.Red, Rank.Number(5))
-      val next = Card(Color.Red, Rank.Number(9))
+      val next = Card(Color.Red, Rank.Skip)
 
-      Card.canPlayOn(top, next) should
+      Card.canPlayOn(top, next, None) shouldBe true
+    }
+
+    "be playable if ranks match" in {
+      val top = Card(Color.Blue, Rank.Number(7))
+      val next = Card(Color.Red, Rank.Number(7))
+      Card.canPlayOn(top, next, None) shouldBe true
     }
   }
 }
