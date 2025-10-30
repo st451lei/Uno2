@@ -11,7 +11,7 @@ class PlayerSpec extends AnyWordSpec {
       val player = Player("Stas", Vector.empty)
       val pile = Vector(
         Card(Color.Red, Rank.Number(1)),
-        Card(Color.Blue, Rank.Number(2)),
+        Card(Color.Blue, Rank.Reverse),
         Card(Color.Green, Rank.Number(3))
       )
       
