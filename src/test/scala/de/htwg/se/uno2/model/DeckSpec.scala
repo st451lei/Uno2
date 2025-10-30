@@ -1,7 +1,7 @@
 package de.htwg.se.uno2.model
 
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers
 
 class DeckSpec extends AnyWordSpec with Matchers {
   private val cards = Seq(

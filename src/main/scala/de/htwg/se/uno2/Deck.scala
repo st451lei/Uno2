@@ -4,7 +4,7 @@ import scala.util.Random
 class Deck(initialCards: Seq[Card]) {
 
   private val original: Vector[Card] = initialCards.toVector
-  private val cards: Vector[Card] = original
+  private var cards: Vector[Card] = original
   
   def size: Int = cards.length
   
