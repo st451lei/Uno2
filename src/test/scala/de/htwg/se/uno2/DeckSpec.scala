@@ -1,15 +1,15 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
 class DeckSpec extends AnyWordSpec with Matchers {
   private val cards = Seq(
-    Card(Some("Red"), "1"),
-    Card(Some("Red"), "2"),
-    Card(Some("Blue"), "1"),
-    Card(Some("Green"), "Skip"),
-    Card(None, "Wild")
+    Card(Color.Red, Rank.Number(1)),
+    Card(Color.Red, Rank.Number(2)),
+    Card(Color.Blue, Rank.Number(1)),
+    Card(Color.Green, Rank.Skip),
+    Card(Color.Black, Rank.Wild)
   )
 
   "A Deck" should {
@@ -59,7 +59,7 @@ class DeckSpec extends AnyWordSpec with Matchers {
       val deck = new Deck(cards)
       val hands = deck.deal(numPlayers = 2, cardsEach = 2)
       hands should have length 2
-      hands.foreach(_..length shouldBe 2)
+      hands.foreach(_.length shouldBe 2)
       deck.size shouldBe cards.size - 4
       
       hands(0) shouldBe Seq(cards(0), cards(2))
@@ -68,11 +68,11 @@ class DeckSpec extends AnyWordSpec with Matchers {
     
     "add a card to the top and to the bottom" in {
       val deck = new Deck(cards)
-      val newCard = Card(Some("Yellow"), "9")
+      val newCard = Card(Color.Yellow, Rank.Number(3))
       deck.add(newCard)
       deck.peek shouldBe Some(newCard)
-      deck.addToBottom(Seq(Card(Some("Black"), "X")))
-      deck.allCards.last shouldBe Card(Some("Black"), "X")
+      deck.addToBottom(Seq(Card(Color.Black, Rank.Wild)))
+      deck.allCards.last shouldBe Card(Color.Black, Rank.Wild)
     }
   }  
   

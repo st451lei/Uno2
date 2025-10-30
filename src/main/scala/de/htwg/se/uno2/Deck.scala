@@ -42,7 +42,7 @@ class Deck(initialCards: Seq[Card]) {
   }
   
   def deal(numPlayers: Int, cardsEach: Int): Seq[Seq[Card]] = {
-    require(numPlayers > 0 && cardsEach >= 0, "ivalid args")
+    require(numPlayers > 0 && cardsEach >= 0, "invalid args")
     val hands = Array.fill(numPlayers)(Vector.empty[Card])
     for (i <- 0 until cardsEach; p <- 0 until numPlayers) {
       if (cards.nonEmpty) {
