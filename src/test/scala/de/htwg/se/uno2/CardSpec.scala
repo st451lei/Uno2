@@ -19,5 +19,17 @@ class CardSpec extends AnyWordSpec {
       val next = Card(Color.Red, Rank.Number(7))
       Card.canPlayOn(top, next, None) shouldBe true
     }
-  }
+
+    "be playable if next card Wild" in {
+      val top = Card(Color.Green, Rank.Reverse)
+      val next = Card(Color.Black, Rank.Wild)
+      Card.canPlayOn(top, next, None) shouldBe true
+    }
+
+    "be playable if next card WildDrawFour" in {
+      val top = Card(Color.Yellow, Rank.DrawTwo)
+      val next = Card(Color.Black, Rank.WildDrawFour)
+      Card.canPlayOn(top, next, None) shouldBe true
+    }
+  }  
 }
