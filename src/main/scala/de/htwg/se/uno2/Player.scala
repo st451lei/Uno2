@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2
 
 final case class Player(name: String, hand: Vector[Card]):
   def size: Int = hand.size

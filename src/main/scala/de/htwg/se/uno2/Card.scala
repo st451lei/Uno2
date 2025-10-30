@@ -8,9 +8,7 @@ enum Rank:
   case Skip, Reverse, DrawTwo
   case Wild, WildDrawFour
   
-final case class Card(color: Color, rank: Rank) {
-  override def toString: String = color.map(_ + " ").getOrElse("") + rank
-}
+final case class Card(color: Color, rank: Rank) {}
 
 object Card:
   def canPlayOn(top: Card, next: Card, chosenColor: Option[Color] = None): Boolean =
