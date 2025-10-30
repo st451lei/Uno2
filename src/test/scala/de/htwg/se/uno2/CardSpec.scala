@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
