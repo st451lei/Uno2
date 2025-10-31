@@ -2,12 +2,12 @@ package de.htwg.se.uno2
 
 enum Color:
   case Red, Yellow, Green, Blue, Black
-  
+
 enum Rank:
   case Number(n: Int)
   case Skip, Reverse, DrawTwo
   case Wild, WildDrawFour
-  
+
 final case class Card(color: Color, rank: Rank) {}
 
 object Card:
