@@ -23,25 +23,39 @@ class Tui(controller: Controller) extends Observer:
   private def loop(): Unit =
     print("> ")
     val input = Option(readLine()).getOrElse("").trim
-    input match
-      case "quit" =>
-        println("Spiel beendet.")
-        () // завершаем
-      case "draw" =>
-        controller.drawCard()
-        loop()
-      case s if s.startsWith("play") =>
-        val parts = s.split(" ")
-        if parts.length == 2 then
-          Try(parts(1).toInt).toOption match
-            case Some(index) => controller.playCard(index)
-            case None        => println("Ungültiger Index.")
-        else
-          println("Verwendung: play <index>")
-        loop()
-      case _ =>
-        println("Unbekannter Befehl. (play <index>, draw, quit)")
-        loop()
+    if controller.isAwaitingColorChoise then
+      input.toLowerCase match
+        case s if s.startsWith("color") =>
+          val parts = s.split("\\s+")
+          if parts.length >= 2 then  controller.chooseColor(parts(1))
+          else println("Verwendung: color r|y|g|b")
+          loop()
+        case "quit" =>
+          println("Spiel beendet."); ()
+        case _ =>
+          controller.chooseColor("")
+          loop()
+    else
+      input match
+        case "quit" =>
+          println("Spiel beendet."); ()// завершаем
+        case "draw" =>
+          controller.drawCard(); loop()
+        case s if s.startsWith("play") =>
+          val parts = s.split("\\s+")
+          if parts.length == 2 then
+            Try(parts(1).toInt).toOption match
+              case Some(index) => controller.playCard(index)
+              case None        => println("Ungültiger Index.")
+          else
+            println("Verwendung: play <index>")
+          loop()
+        case s if s.startsWith("color") =>
+          println("Jetzt keine Farbauswahl nötig.")
+          loop()
+        case _ =>
+          println("Unbekannter Befehl. (play <index>, draw, quit)")
+          loop()
 
   private def askPlayers(): Seq[String] =
     println("Spieler eingeben, z.B. 'Ann Ben':")

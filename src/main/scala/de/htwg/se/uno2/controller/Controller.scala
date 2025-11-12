@@ -11,6 +11,7 @@ class Controller extends Observable:
   private var players: Vector[Player] = Vector.empty
   private var currentPlayerIndex: Int = 0
   private var chosenColor: Option[Color] = None
+  private var awaitingColor: Boolean = false
 
   // --- публичный API ---
 
@@ -34,21 +35,27 @@ class Controller extends Observable:
     // 4) сбросить прочее состояние
     currentPlayerIndex = 0
     chosenColor = None
+    awaitingColor = false
 
     notifyObservers
 
   def currentPlayer: Player = players(currentPlayerIndex)
 
   def drawCard(): Unit =
-    val (c, d2) = deck.draw()
-    deck = d2
-    val cur = currentPlayer
-    val updated = cur.copy(hand = cur.hand :+ c)
-    players = players.updated(currentPlayerIndex, updated)
-    notifyObservers
+    if awaitingColor then
+      notifyObservers
+    else
+      val (c, d2) = deck.draw()
+      deck = d2
+      val cur = currentPlayer
+      val updated = cur.copy(hand = cur.hand :+ c)
+      players = players.updated(currentPlayerIndex, updated)
+      notifyObservers
 
   def playCard(index: Int): Unit =
-    if index < 0 || index >= currentPlayer.hand.size then
+    if awaitingColor then
+      notifyObservers
+    else if index < 0 || index >= currentPlayer.hand.size then
       notifyObservers // неверный индекс — просто сообщаем UI
     else
       val (card, newPl) = currentPlayer.playAt(index)
@@ -59,9 +66,30 @@ class Controller extends Observable:
       else
         discard = discard :+ card
         players = players.updated(currentPlayerIndex, newPl)
-        chosenColor = None
-        nextPlayer()
-        notifyObservers
+
+        card.rank match
+          case Rank.Wild | Rank.WildDrawFour =>
+            chosenColor = None
+            awaitingColor = true
+            notifyObservers
+          case _ =>
+            chosenColor = None
+            nextPlayer()
+            notifyObservers
+  def chooseColor(token: String): Unit =
+    if !awaitingColor then
+      notifyObservers
+    else
+      parseColor(token) match
+        case Some(col) =>
+          chosenColor = Some(col)
+          awaitingColor = false
+          nextPlayer()
+          notifyObservers
+        case None =>
+          notifyObservers
+
+  def isAwaitingColorChoise: Boolean = awaitingColor
 
   def nextPlayer(): Unit =
     if players.nonEmpty then
@@ -71,12 +99,17 @@ class Controller extends Observable:
     val current = currentPlayer
     val handStr = current.hand.zipWithIndex.map { case (c, i) => s"[$i] $c" }.mkString(", ")
     val topCard = discard.lastOption.map(_.toString).getOrElse("Keine Karte")
+    val colorInfo =
+      chosenColor.map(c => s"Gewählte Farbe: $c")
+        .orElse(if awaitingColor then Some("Gewählte Farbe: -(choose with: color r|y|g|b)") else Some("Gewählte Farbe: -"))
+        .getOrElse("")
+
     s"""
        |Aktueller Spieler: ${current.name}
        |Oberste Karte: $topCard
        |Hand: $handStr
        |Deckgröße: ${deck.size}
-       |Befehl: play <i> | draw | quit
+       |Befehl: ${if awaitingColor then "color r|y|g|b | quit" else "play <i> | draw | quit"}
        |""".stripMargin
 
   // --- helpers ---
@@ -97,3 +130,11 @@ class Controller extends Observable:
     c.rank match
       case Rank.Wild | Rank.WildDrawFour => drawFirstNonWild(d2)
       case _ => (c, d2)
+      
+  private def parseColor(token: String): Option[Color] =
+    token.trim.toLowerCase match
+      case "r" | "red" | "rot" => Some(Color.Red)
+      case "y" | "yellow" | "gelb" => Some(Color.Yellow)
+      case "g" | "green" | "grün" | "gruen" => Some(Color.Green)
+      case "b" | "blue" | "blau" => Some(Color.Blue)
+      case _ => None
