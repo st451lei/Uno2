@@ -1,38 +1,33 @@
 package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.model._
+import de.htwg.se.uno2.model.Color.*
+import de.htwg.se.uno2.model.Rank.*
 import de.htwg.se.uno2.util.Observable
 
 class Controller extends Observable:
 
-  // --- состояние игры (модельные объекты иммутабельные, здесь меняются только ссылки) ---
   private var deck: Deck = Deck(Vector.empty)
   private var discard: Vector[Card] = Vector.empty
   private var players: Vector[Player] = Vector.empty
   private var currentPlayerIndex: Int = 0
   private var chosenColor: Option[Color] = None
   private var awaitingColor: Boolean = false
-
-  // --- публичный API ---
-
+  
   def startGame(names: Seq[String]): Unit =
     require(names.nonEmpty, "Soll mindestens 1 Spieler sein")
-
-    // 1) создать и перетасовать колоду
+    
     deck = Deck.from(fullUnoDeck).shuffle()
-
-    // 2) создать игроков и раздать по 7
+    
     players = names.map(n => Player(n, Vector.empty)).toVector
     val (hands, deckAfterDeal) = deck.deal(players.size, 7)
     players = players.indices.map(i => players(i).copy(hand = hands(i))).toVector
     deck = deckAfterDeal
-
-    // 3) выложить первую НЕ-джокер карту на сброс
+    
     val (first, d2) = drawFirstNonWild(deck)
     discard = Vector(first)
     deck = d2
-
-    // 4) сбросить прочее состояние
+    
     currentPlayerIndex = 0
     chosenColor = None
     awaitingColor = false
@@ -56,7 +51,7 @@ class Controller extends Observable:
     if awaitingColor then
       notifyObservers
     else if index < 0 || index >= currentPlayer.hand.size then
-      notifyObservers // неверный индекс — просто сообщаем UI
+      notifyObservers
     else
       val (card, newPl) = currentPlayer.playAt(index)
       val top = discard.lastOption
@@ -111,17 +106,11 @@ class Controller extends Observable:
        |Deckgröße: ${deck.size}
        |Befehl: ${if awaitingColor then "color r|y|g|b | quit" else "play <i> | draw | quit"}
        |""".stripMargin
-
-  // --- helpers ---
-
-  // Генератор полной UNO-колоды. Вынесен на уровень класса (НЕ внутри startGame),
-  // поэтому его можно спокойно вызывать выше.
+  
   private def fullUnoDeck: Seq[Card] =
-    import de.htwg.se.uno2.model.Color.*
-    import de.htwg.se.uno2.model.Rank.*
     val colors  = List(Red, Yellow, Green, Blue)
-    val numbers = for c <- colors; n <- 0 to 9 yield Card(c, Number(n))
-    val actions = for c <- colors; r <- List(Skip, Reverse, DrawTwo) yield Card(c, r)
+    val numbers = for c <- colors; n <- 0 to 9; count <- if n == 0 then 1 to 1 else 1 to 2 yield Card(c, Number(n))
+    val actions = for c <- colors; r <- List(Skip, Reverse, DrawTwo); _ <- 1 to 2 yield Card(c, r)
     val wilds   = List.fill(4)(Card(Black, Wild)) ++ List.fill(4)(Card(Black, WildDrawFour))
     (numbers ++ actions ++ wilds).toVector
 

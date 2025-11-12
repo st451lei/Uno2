@@ -1,10 +1,10 @@
-package de.htwg.se.uno2
+package de.htwg.se.uno2.model
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class DeckSpec extends AnyWordSpec with Matchers {
-  private val cards = Seq(
+  private val cards = Vector(
     Card(Color.Red, Rank.Number(1)),
     Card(Color.Red, Rank.Number(2)),
     Card(Color.Blue, Rank.Number(1)),

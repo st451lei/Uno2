@@ -9,38 +9,27 @@ final case class Deck(cards: Vector[Card]) {
 
   def peek: Option[Card] = cards.headOption
 
-  /** Взять 1 карту сверху. Бросит require, если колода пустая. */
   def draw(): (Card, Deck) = {
     require(cards.nonEmpty, "deck is empty")
     val c = cards.head
     (c, copy(cards = cards.tail))
   }
 
-  /** Взять n карт сверху (или меньше, если карт не хватает). */
   def draw(n: Int): (Vector[Card], Deck) = {
     require(n >= 0, "n < 0")
     val (take, rest) = cards.splitAt(n)
     (take, copy(cards = rest))
   }
 
-  /** Положить карту НАВЕРХ. */
   def add(card: Card): Deck =
     copy(cards = card +: cards)
 
-  /** Положить набор карт ВНИЗ колоды (в конец). */
   def addToBottom(cardsToAdd: Seq[Card]): Deck =
     copy(cards = cards ++ cardsToAdd)
 
-  /** Перетасовать колоду. */
   def shuffle(): Deck =
     copy(cards = Random.shuffle(cards))
 
-  /**
-   * Раздать карты:
-   * @param numPlayers сколько игроков
-   * @param cardsEach  сколько карт каждому
-   * @return (Vector рук игроков, оставшаяся колода)
-   */
   def deal(numPlayers: Int, cardsEach: Int): (Vector[Vector[Card]], Deck) = {
     require(numPlayers > 0 && cardsEach >= 0, "invalid deal args")
     var d = this
