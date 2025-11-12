@@ -3,45 +3,64 @@ package de.htwg.se.uno2.model
 import scala.util.Random
 
 final case class Deck(cards: Vector[Card]) {
-  
   def size: Int = cards.length
-
   def isEmpty: Boolean = cards.isEmpty
+  def nonEmpty: Boolean = cards.nonEmpty
 
   def peek: Option[Card] = cards.headOption
-  
-  def draw(): (Card, Deck) = 
+
+  /** Взять 1 карту сверху. Бросит require, если колода пустая. */
+  def draw(): (Card, Deck) = {
+    require(cards.nonEmpty, "deck is empty")
     val c = cards.head
     (c, copy(cards = cards.tail))
-  
+  }
 
-  def draw(n: Int): (Vector[Card], Deck) = 
+  /** Взять n карт сверху (или меньше, если карт не хватает). */
+  def draw(n: Int): (Vector[Card], Deck) = {
+    require(n >= 0, "n < 0")
     val (take, rest) = cards.splitAt(n)
     (take, copy(cards = rest))
-  
+  }
 
+  /** Положить карту НАВЕРХ. */
   def add(card: Card): Deck =
     copy(cards = card +: cards)
-  
-  def shuffle(): Deck =
-    copy(cards = Random.shuffle(cards))
-  
+
+  /** Положить набор карт ВНИЗ колоды (в конец). */
   def addToBottom(cardsToAdd: Seq[Card]): Deck =
     copy(cards = cards ++ cardsToAdd)
-  
 
-  def deal(numPlayers: Int, cardsEach: Int): (Vector[Vector[Card]], Deck) = 
-    require(numPlayers > 0 && cardsEach >= 0, "invalid args")
+  /** Перетасовать колоду. */
+  def shuffle(): Deck =
+    copy(cards = Random.shuffle(cards))
+
+  /**
+   * Раздать карты:
+   * @param numPlayers сколько игроков
+   * @param cardsEach  сколько карт каждому
+   * @return (Vector рук игроков, оставшаяся колода)
+   */
+  def deal(numPlayers: Int, cardsEach: Int): (Vector[Vector[Card]], Deck) = {
+    require(numPlayers > 0 && cardsEach >= 0, "invalid deal args")
     var d = this
-    val hands = Vector.tabulate(numPlayers)(_ => Vector.empty[Card])
-    val dealt = (0 until cardsEach).foldLeft(hands) { (acc, _) => 
+    val hands0 = Vector.fill(numPlayers)(Vector.empty[Card])
+
+    val hands = (0 until cardsEach).foldLeft(hands0) { (acc, _) =>
       acc.indices.foldLeft(acc) { (acc2, p) =>
         if d.isEmpty then acc2
-        else
+        else {
           val (c, d2) = d.draw()
           d = d2
           acc2.updated(p, acc2(p) :+ c)
+        }
       }
-    }      
-    (dealt,d)
+    }
+    (hands, d)
+  }
+}
+
+object Deck {
+  val empty: Deck = Deck(Vector.empty)
+  def from(all: Seq[Card]): Deck = Deck(all.toVector)
 }
