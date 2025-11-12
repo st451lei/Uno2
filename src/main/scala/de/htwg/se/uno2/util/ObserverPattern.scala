@@ -1,4 +1,4 @@
-package de.htwg.se.uno.util
+package de.htwg.se.uno2.util
 
 import de.htwg.se.uno2.util._
 

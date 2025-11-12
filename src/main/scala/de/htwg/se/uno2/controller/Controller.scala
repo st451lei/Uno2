@@ -1,30 +1,24 @@
 package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.model._
+import de.htwg.se.uno2.util.Observable
 
 import scala.util.Random
 
-class Controller:
-
-  private val allCards: Seq[Card] = for
-    color <- Seq(Color.Red, Color.Yellow, Color.Green, Color.Blue)
-    number <- 0 to 9
-  yield Card(color, Rank.Number(number))
-
-  private var deck = new Deck(Random.shuffle(allCards))
-  private var discardPile: Vector[Card] = Vector.empty
-  private var players: Vector[Player] = Vector(
-    Player("Alice", Vector.empty),
-    Player("Bob", Vector.empty)
-  )
+class Controller extends Observable:
+  
+  private var deck: Deck = Deck.empty
+  private var discard: Vector[Card] = Vector.empty
+  private var players: Vector[Player] = Vector.empty
   private var currentPlayerIndex: Int = 0
+  private var chosenColor: Option[Color] = None
 
-  def startGame(): Unit =
-    val hands = deck.deal(players.size, 7)
-    players = players.zip(hands).map { case (p,h) => p.copy(hand = h.toVector)}
-    discardPile = Vector(deck.draw().get)
-    println(s"Spiel gestartet! Erste Karte: ${discardPile.head}")
-
+  def startGame(names: Seq[String]): Unit =
+    require(names.nonEmpty, "Soll mindestens 2 Spieler sein")
+    players = names.map(n => Player(n, Vector.empty)).toVector
+    
+    val deck0 = fullUnoDeck.shuffle
+    
   def currentPlayer: Player = players(currentPlayerIndex)
 
   def drawCard(): Unit =
