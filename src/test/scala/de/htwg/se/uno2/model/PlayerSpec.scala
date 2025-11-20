@@ -1,7 +1,7 @@
-package de.htwg.se.uno2
+package de.htwg.se.uno2.model
 
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.should.Matchers._
 
 class PlayerSpec extends AnyWordSpec {
   
