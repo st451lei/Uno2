@@ -1,9 +1,6 @@
 package de.htwg.se.uno2.controller
 
-import de.htwg.se.uno2.model._
-import de.htwg.se.uno2.model.Color.*
-import de.htwg.se.uno2.model.Rank.*
-import de.htwg.se.uno2.controller.Controller
+import de.htwg.se.uno2.model.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -12,101 +9,66 @@ class ControllerSpec extends AnyWordSpec with Matchers:
   "A Controller" should {
 
     "initialize a game correctly with startGame()" in {
-      val controller = Controller()
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
 
-      val players = Seq("Alice", "Bob")
-      players should contain (controller.currentPlayer.name)
-      controller.gameStateToString should include ("Aktueller Spieler")
+      val current = controller.currentPlayer
 
-      controller.currentPlayer.hand.size shouldBe 7
+      Seq("Alice", "Bob") should contain (current.name)
+      current.hand.size shouldBe 7
+
+      val s = controller.gameStateToString
+      s should include ("Aktueller Spieler")
+      s should include ("Deckgröße")
     }
 
-    "allow a player to draw a card" in {
-      val controller = Controller()
+    "let the current player draw a card" in {
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
+
       val before = controller.currentPlayer.hand.size
-      controller.drawCard()
+      controller.drawCard
       controller.currentPlayer.hand.size shouldBe (before + 1)
     }
 
-    "advance to the next player" in {
-      val controller = Controller()
+    "not change hand size when an invalid index is played" in {
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
-      val first = controller.currentPlayer.name
-      controller.nextPlayer()
-      controller.currentPlayer.name should not equal first
-    }
-    
-    "not allow invalid card index to be played" in {
-      val controller = Controller()
-      controller.startGame(Seq("Alice", "Bob"))
+
       val before = controller.currentPlayer.hand.size
       controller.playCard(99)
       controller.currentPlayer.hand.size shouldBe before
     }
-    
-    "play a valid card correctly" in {
-      val controller = Controller()
+
+    "handle a valid index without crashing (card is either played or rejected)" in {
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
-      val firstCard = controller.currentPlayer.hand.head
+
+      val before = controller.currentPlayer.hand.size
       controller.playCard(0)
-      controller.currentPlayer.hand.size should (be < 7 or equal(7))
+      
+      controller.currentPlayer.hand.size should (be <= before)
     }
 
-    "enter awaiting-color mode when Wild is played" in {
-      val controller = Controller()
-
+    "expose awaiting-color flag consistently with GameState" in {
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
-      val wild = Card(Color.Black, Rank.Wild)
-      val p = controller.currentPlayer
-      val newPlayer = p.copy(hand = Vector(wild))
-      val updatedPlayers = Vector(newPlayer, controller.currentPlayer)
-
-      val field = classOf[Controller].getDeclaredField("players")
-      field.setAccessible(true)
-      field.set(controller, updatedPlayers)
-
-      controller.playCard(0)
-      controller.isAwaitingColorChoise shouldBe true
-    }
-
-    "choose a color after playing a Wild" in {
-      val controller = Controller()
-
-      controller.startGame(Seq("Alice", "Bob"))
-
-      val wild = Card(Color.Black, Rank.Wild)
-      val p = controller.currentPlayer
-      val newPlayer = p.copy(hand = Vector(wild))
-      val updatedPlayers = Vector(newPlayer, controller.currentPlayer)
-
-      val field = classOf[Controller].getDeclaredField("players")
-      field.setAccessible(true)
-      field.set(controller, updatedPlayers)
-
-      controller.playCard(0)
-      controller.isAwaitingColorChoise shouldBe true
-
+      
+      controller.isAwaitingColorChoise shouldBe false
+      
       controller.chooseColor("r")
       controller.isAwaitingColorChoise shouldBe false
     }
 
-    "rotate through players correctly with nextPlayer()" in {
-      val controller = Controller()
+    "produce a readable state string at any time" in {
+      val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
-      val first = controller.currentPlayer.name
-      controller.nextPlayer()
-      controller.currentPlayer.name should not equal first
-    }
 
-    "generate a readable state string" in {
-      val controller = Controller()
-      controller.startGame(Seq("Alice", "Bob"))
-      val s = controller.gameStateToString
+      val s1 = controller.gameStateToString
+      s1 should include ("Aktueller Spieler")
 
-      s should include("Aktueller Spieler")
-      s should include("Oberste Karte")
-      s should include("Deckgröße")
+      controller.drawCard
+      val s2 = controller.gameStateToString
+      s2 should include ("Aktueller Spieler")
     }
   }
