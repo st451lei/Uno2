@@ -1,4 +1,4 @@
-package de.htwg.se.uno2
+package de.htwg.se.uno2.model
 
 enum Color:
   case Red, Yellow, Green, Blue, Black
@@ -14,6 +14,6 @@ object Card:
   def canPlayOn(top: Card, next: Card, chosenColor: Option[Color] = None): Boolean =
     val activeColor = chosenColor.getOrElse(top.color)
     (next.color == activeColor)
-    || (next.rank == top.rank)
-    || (next.rank == Rank.Wild)
-    || (next.rank == Rank.WildDrawFour)
+      || (next.rank == top.rank)
+      || (next.rank == Rank.Wild)
+      || (next.rank == Rank.WildDrawFour)
