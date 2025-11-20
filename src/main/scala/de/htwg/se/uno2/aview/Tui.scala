@@ -5,21 +5,17 @@ import de.htwg.se.uno2.util.Observer
 import scala.io.StdIn.readLine
 import scala.util.Try
 
-class Tui(controller: Controller) extends Observer:
-  // подписываемся на обновления контроллера
+class Tui(val controller: Controller) extends Observer:
   controller.addObserver(this)
-
-  // вызывается при каждом notifyObservers()
+  
   def update: Unit =
     println(controller.gameStateToString)
-
-  // точка запуска TUI
+  
   def run(): Unit =
     val names = askPlayers()
     controller.startGame(names)
     loop()
-
-  // основной REPL-цикл
+  
   private def loop(): Unit =
     print("> ")
     val input = Option(readLine()).getOrElse("").trim
@@ -38,7 +34,7 @@ class Tui(controller: Controller) extends Observer:
     else
       input match
         case "quit" =>
-          println("Spiel beendet."); ()// завершаем
+          println("Spiel beendet."); ()
         case "draw" =>
           controller.drawCard(); loop()
         case s if s.startsWith("play") =>

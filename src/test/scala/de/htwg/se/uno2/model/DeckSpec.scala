@@ -14,65 +14,67 @@ class DeckSpec extends AnyWordSpec with Matchers {
 
   "A Deck" should {
     "have the correct initial size" in {
-    val deck = new Deck(cards)
+    val deck = Deck(cards)
     deck.size shouldBe cards.size
     deck.peek shouldBe Some(cards.head)
     }
     
-    "draw a single card from the top" in {
-      val deck = new Deck(cards)
-      val c = deck.draw()
-      c shouldBe Some(cards.head)
-      deck.size shouldBe cards.size - 1
+    "draw a single card and produce a new deck" in {
+      val deck = Deck(cards)
+      val (c,d2) = deck.draw()
+      c shouldBe cards.head
+      d2.size shouldBe cards.size - 1
     }
-    "draw n cards and reduce size accordingly" in {
-      val deck = new Deck(cards)
-      val drawn = deck.draw(3)
-      drawn should have size 3
-      deck.size shouldBe cards.size -3
+    "draw n cards and produce a new deck" in {
+      val deck = Deck(cards)
+      val (drawn,d2) = deck.draw(3)
       drawn shouldBe cards.take(3)
+      d2.size shouldBe cards.size -3
     }
     
-    "report empty when all cards drawn" in {
-      val deck = new Deck(cards)
-      deck.draw(cards.size)
-      deck.isEmpty shouldBe true
-      deck.draw() shouldBe None
+    "report empty when all cards are drawn" in {
+      val deck = Deck(cards)
+      val (drawnAll,d2) = deck.draw(deck.size)
+      d2.isEmpty shouldBe true
+      an [IllegalArgumentException] shouldBe thrownBy {
+        d2.draw()
+      }
     }
-    "shuffle without losing cards (same multiset)" in {
-      val deck = new Deck(cards)
-      val before = deck.allCards
-      deck.shuffle()
-      val after = deck.allCards
-      after.toSet shouldBe before.toSet
-      after.length shouldBe before.length
-    }
-    
-    "can reset to original order" in {
-      val deck = new Deck(cards)
-      deck.shuffle()
-      deck.reset()
-      deck.allCards shouldBe cards
+    "shuffle without losing cards" in {
+      val deck = Deck(cards)
+      val d2 = deck.shuffle()
+      d2.cards.toSet shouldBe deck.cards.toSet
+      d2.cards.length shouldBe deck.cards.length
     }
     
-    "deal cards fairly to players and reduce deck size" in {
-      val deck = new Deck(cards)
-      val hands = deck.deal(numPlayers = 2, cardsEach = 2)
+    "reset to the original order using Deck.from" in {
+      val deck = Deck(cards)
+      val shuffled = deck.shuffle()
+      val reset = Deck.from(cards)
+      reset.cards shouldBe cards
+    }
+    
+    "deal cards to players and retrun new deck" in {
+      val deck = Deck(cards)
+      val (hands,d2) = deck.deal(numPlayers = 2, cardsEach = 2)
       hands should have length 2
       hands.foreach(_.length shouldBe 2)
-      deck.size shouldBe cards.size - 4
+      d2.size shouldBe cards.size - 4
       
       hands(0) shouldBe Seq(cards(0), cards(2))
       hands(1) shouldBe Seq(cards(1), cards(3))
     }
     
-    "add a card to the top and to the bottom" in {
-      val deck = new Deck(cards)
+    "add cards immutably to the top and to the bottom" in {
+      val deck = Deck(cards)
       val newCard = Card(Color.Yellow, Rank.Number(3))
-      deck.add(newCard)
-      deck.peek shouldBe Some(newCard)
-      deck.addToBottom(Seq(Card(Color.Black, Rank.Wild)))
-      deck.allCards.last shouldBe Card(Color.Black, Rank.Wild)
+
+      val d2 = deck.add(newCard)
+      d2.peek shouldBe Some(newCard)
+
+      val newCard2 = Card(Color.Black, Rank.Wild)
+      val d3 = d2.addToBottom(Seq(newCard2))
+      d3.cards.last shouldBe newCard2
     }
   }  
   

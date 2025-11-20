@@ -5,7 +5,6 @@ import scala.util.Random
 final case class Deck(cards: Vector[Card]) {
   def size: Int = cards.length
   def isEmpty: Boolean = cards.isEmpty
-  def nonEmpty: Boolean = cards.nonEmpty
 
   def peek: Option[Card] = cards.headOption
 
