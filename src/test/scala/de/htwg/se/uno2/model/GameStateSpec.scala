@@ -91,7 +91,7 @@ class GameStateSpec extends AnyWordSpec with Matchers:
 
     "not play an unplayable card" in {
       val top  = Card(Color.Red,   Rank.Number(5))
-      val card = Card(Color.Green, Rank.Skip) // нельзя играть
+      val card = Card(Color.Green, Rank.Skip)
       val p    = Player("P1", Vector(card))
 
       val state = GameState(
@@ -109,7 +109,7 @@ class GameStateSpec extends AnyWordSpec with Matchers:
 
     "play a normal card and move to next player" in {
       val top  = Card(Color.Red, Rank.Number(5))
-      val card = Card(Color.Red, Rank.Skip)  // совпадает цвет
+      val card = Card(Color.Red, Rank.Skip)
       val p1   = Player("P1", Vector(card))
       val p2   = Player("P2", Vector.empty)
 
@@ -152,7 +152,7 @@ class GameStateSpec extends AnyWordSpec with Matchers:
       s2.players(0).hand shouldBe empty
       s2.awaitingColor shouldBe true
       s2.chosenColor shouldBe None
-      s2.currentPlayerIndex shouldBe 0 // смена хода будет после chooseColor
+      s2.currentPlayerIndex shouldBe 0
     }
   }
 
@@ -177,8 +177,7 @@ class GameStateSpec extends AnyWordSpec with Matchers:
       val wild = Card(Color.Black, Rank.Wild)
       val p1   = Player("P1", Vector.empty)
       val p2   = Player("P2", Vector.empty)
-
-      // состояние после уже сыгранного Wild
+      
       val afterWild = GameState(
         deck = Deck.empty,
         discard = Vector(top, wild),

@@ -36,7 +36,7 @@ class Tui(val controller: Controller) extends Observer:
         case "quit" =>
           println("Spiel beendet."); ()
         case "draw" =>
-          controller.drawCard(); loop()
+          controller.drawCard; loop()
         case s if s.startsWith("play") =>
           val parts = s.split("\\s+")
           if parts.length == 2 then

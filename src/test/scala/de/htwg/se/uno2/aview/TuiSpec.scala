@@ -31,7 +31,7 @@ class TuiSpec extends AnyWordSpec with Matchers:
       else
         trimmed match
           case "quit" => println("Spiel beendet.")
-          case "draw" => t.controller.drawCard()
+          case "draw" => t.controller.drawCard
           case s if s.startsWith("play") =>
             val p = s.split("\\s+")
             if p.length == 2 then
@@ -55,37 +55,37 @@ class TuiSpec extends AnyWordSpec with Matchers:
         controller.startGame(Seq("A", "B"))
 
       out.toString should include ("Aktueller Spieler: A")
-  }
+    }
 
-  "print error on unknown command" in {
-    val controller = new Controller
-    controller.startGame(Seq("A", "B"))
-    val tui = new TestTui(controller)
+    "print error on unknown command" in {
+      val controller = new Controller
+      controller.startGame(Seq("A", "B"))
+      val tui = new TestTui(controller)
 
-    val result = tui.testInput("foobar")
-    result should include ("Unbekannter Befehl")
-  }
+      val result = tui.testInput("foobar")
+      result should include ("Unbekannter Befehl")
+    }
 
-"execute draw command" in {
-  val controller = new Controller
-  controller.startGame(Seq("A", "B"))
-  val oldHandSize = controller.currentPlayer.hand.size
+    "execute draw command" in {
+      val controller = new Controller
+      controller.startGame(Seq("A", "B"))
+      val oldHandSize = controller.currentPlayer.hand.size
 
-  val tui = new TestTui(controller)
-  tui.testInput("draw")
+      val tui = new TestTui(controller)
+      tui.testInput("draw")
 
-  controller.currentPlayer.hand.size shouldBe oldHandSize + 1
-}
+      controller.currentPlayer.hand.size shouldBe oldHandSize + 1
+    }
 
-"reject invalid play command index" in {
-  val controller = new Controller
-  controller.startGame(Seq("A", "B"))
-  val tui = new TestTui(controller)
+    "reject invalid play command index" in {
+      val controller = new Controller
+      controller.startGame(Seq("A", "B"))
+      val tui = new TestTui(controller)
 
-  val out = tui.testInput("play 99")
-  out should include ("")
-  controller.currentPlayer.hand.size shouldBe 7
-  }
+      val out = tui.testInput("play 99")
+      out should include ("")
+      controller.currentPlayer.hand.size shouldBe 7
+    }
     
 }
 
