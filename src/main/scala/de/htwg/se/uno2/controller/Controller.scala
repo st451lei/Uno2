@@ -1,15 +1,14 @@
 package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.model._
-import de.htwg.se.uno2.model.GameState.*
 import de.htwg.se.uno2.util.Observable
 
-class Controller extends Observable:
+class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Observable:
   
   private var state: Option[GameState] = None
   
   def startGame(names: Seq[String]): Unit =
-    state = Some(GameState.initial(names))
+    state = Some(factory.create(names))
     notifyObservers
     
   def currentPlayer: Player =
