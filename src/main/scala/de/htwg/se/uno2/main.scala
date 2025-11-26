@@ -8,3 +8,4 @@ import de.htwg.se.uno2.aview.Tui
   val controller = Controller()
   val tui = Tui(controller)
   tui.run()
+  
