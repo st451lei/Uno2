@@ -7,8 +7,11 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
   
   private var state: Option[GameState] = None
   
+  private var mode: ControllerState = NormalState
+  
   def startGame(names: Seq[String]): Unit =
     state = Some(factory.create(names))
+    mode = NormalState
     notifyObservers
     
   def currentPlayer: Player =
@@ -18,16 +21,40 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
     state.exists(_.isAwaitingColorChoise)
     
   def drawCard: Unit =
-    state = state.map(s => s.drawCard)
-    notifyObservers
+    mode.drawCard(this)
     
   def playCard(index: Int): Unit =
-    state = state.map(s => s.playCard(index))
-    notifyObservers
+    mode.playCard(this, index)
     
   def chooseColor(token: String): Unit =
-    state = state.map(s => s.chooseColor(token))
-    notifyObservers
+    mode.chooseColor(this, token)
     
   def gameStateToString: String =
     state.map(_.toDisplayString).getOrElse("Noch kein Spiel gestartet")
+
+  private[controller] def setMode(newMode: ControllerState): Unit =
+    mode = newMode
+    
+  private[controller] def playCardInternal(index: Int): Unit =
+    state = state.map(s => s.playCard(index))
+
+    if state.exists(_.isAwaitingColorChoise) then
+      mode = AwaitingColorState
+    else
+      mode = NormalState
+
+    notifyObservers
+    
+  private[controller] def chooseColorInternal(token: String): Unit =
+    state = state.map(_.chooseColor(token))
+    
+    mode = NormalState
+    
+    notifyObservers
+    
+  private[controller] def drawCardInternal(): Unit =
+    state = state.map(_.drawCard)
+    
+    mode = NormalState
+    
+    notifyObservers
