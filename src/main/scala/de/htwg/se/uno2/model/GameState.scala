@@ -7,7 +7,8 @@ final case class GameState(
   players: Vector[Player],
   currentPlayerIndex: Int,
   chosenColor: Option[Color],
-  awaitingColor: Boolean
+  awaitingColor: Boolean,
+  ruleSet: RuleSet
   ):
 
   def currentPlayer: Player = players(currentPlayerIndex)
@@ -36,7 +37,7 @@ final case class GameState(
     else
       val (card, newPl) = currentPlayer.playAt(index)
       val top = discard.lastOption
-      val canPlay = top.forall(t => Card.canPlayOn(t, card, chosenColor))
+      val canPlay = top.forall(t => ruleSet.canPlayOn(t, card, chosenColor))
       if !canPlay then this
       else
         val newDiscard = discard :+ card

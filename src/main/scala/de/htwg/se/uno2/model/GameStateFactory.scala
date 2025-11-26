@@ -22,7 +22,8 @@ object DefaultGameStateFactory extends GameStateFactory:
       players = players,
       currentPlayerIndex = 0,
       chosenColor = None,
-      awaitingColor = false
+      awaitingColor = false,
+      ruleSet = ClassicRuleSet
     )
     
   private def fullUnoDeck: Seq[Card] =
