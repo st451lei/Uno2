@@ -40,3 +40,9 @@ object DefaultGameStateFactory extends GameStateFactory:
       c.rank match
         case Rank.Wild | Rank.WildDrawFour => drawFirstNonWild(d2)
         case _ => (c,d2)
+        
+object ColorOnlyGameStateFactory extends GameStateFactory:
+  override def create(names: Seq[String]): GameState =
+    val ClassicState = DefaultGameStateFactory.create(names)
+    ClassicState.copy(ruleSet = ColorOnlyRuleSet)
+    

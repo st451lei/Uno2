@@ -83,7 +83,7 @@ final case class GameState(
        |Deckgröße: ${deck.size}
        |Befehl: ${if awaitingColor then "color r|y|g|b | quit" else "play <i> | draw | quit"}
        |""".stripMargin
-    
+
 object GameState:
 
   def parseColor(token: String): Option[Color] =
