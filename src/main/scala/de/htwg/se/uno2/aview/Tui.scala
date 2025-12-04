@@ -23,6 +23,13 @@ class Tui(controller: Controller) extends BaseTui(controller):
           controller.chooseColor(parts(1))
         else
           println("Verwendung: color r|y|g|b")
+
+      case "undo" =>
+        controller.undo()
+
+      case "redo" =>
+        controller.redo()
+
       case _ =>
         controller.chooseColor("")
         
@@ -40,11 +47,17 @@ class Tui(controller: Controller) extends BaseTui(controller):
         else
           println("Verwendung: play <index>")
 
+      case "undo" =>
+        controller.undo()
+
+      case "redo" =>
+        controller.redo()
+
       case s if s.startsWith("color") =>
         print("Jetzt keine Farbauswahl nötig")
 
       case _ =>
-        println("Unbekannter Befehl. (play <index>, draw, quit)")
+        println("Unbekannter Befehl. (play <index>, draw, undo, redo, quit)")
   
 
   protected def askPlayers(): Seq[String] =
