@@ -8,6 +8,11 @@ class ControllerSpec extends AnyWordSpec with Matchers:
 
   "A Controller" should {
 
+    "return fallback text before game is started" in {
+      val controller = new Controller
+      controller.gameStateToString shouldBe "Noch kein Spiel gestartet"
+    }
+
     "initialize a game correctly with startGame()" in {
       val controller = new Controller
       controller.startGame(Seq("Alice", "Bob"))
@@ -70,5 +75,63 @@ class ControllerSpec extends AnyWordSpec with Matchers:
       controller.drawCard
       val s2 = controller.gameStateToString
       s2 should include ("Aktueller Spieler")
+    }
+
+    "use the provided GameStateFactory" in {
+      val customState = GameState(
+        deck = Deck.empty,
+        discard = Vector(Card(Color.Red, Rank.Number(1))),
+        players = Vector(Player("Only", Vector.empty)),
+        currentPlayerIndex = 0,
+        chosenColor = None,
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
+      )
+
+      val factory = new GameStateFactory:
+        override def create(names: Seq[String]): GameState = customState
+
+      val controller = new Controller(factory)
+      controller.startGame(Seq("ignored"))
+      
+      controller.currentPlayer.name shouldBe "Only"
+      controller.gameStateToString should include ("Oberste Karte")
+    }
+    
+    "apply AwaitingColorState behaviour correctly" in {
+      val top = Card(Color.Red, Rank.Number(5))
+      val wild = Card(Color.Black, Rank.Wild)
+      val p1 = Player("P1", Vector.empty)
+      val p2 = Player("P2", Vector.empty)
+      
+      val baseState = GameState(
+        deck = Deck.empty,
+        discard = Vector(top,wild),
+        players = Vector(p1, p2),
+        currentPlayerIndex = 0,
+        chosenColor = None,
+        awaitingColor = true,
+        ruleSet = ClassicRuleSet
+      )
+      
+      val factory = new GameStateFactory:
+        override def create(names: Seq[String]): GameState = baseState
+        
+      val controller = new Controller(factory)
+      controller.startGame(Seq("P1", "P2"))
+      
+      controller.isAwaitingColorChoise shouldBe true
+      
+      val beforePlayer = controller.currentPlayer
+      val beforeHand = beforePlayer.hand.size
+      
+      AwaitingColorState.playCard(controller, 0)
+      AwaitingColorState.drawCard(controller)
+      
+      controller.currentPlayer shouldBe beforePlayer
+      controller.currentPlayer.hand.size shouldBe beforeHand
+      
+      AwaitingColorState.chooseColor(controller, "g")
+      controller.isAwaitingColorChoise shouldBe false
     }
   }

@@ -9,7 +9,7 @@ class GameStateSpec extends AnyWordSpec with Matchers:
 
     "create players with 7 cards each and a non-wild top card" in {
       val names = Seq("Alice", "Bob")
-      val state = GameState.initial(names)
+      val state = DefaultGameStateFactory.create(names)
       
       state.players.map(_.name) should contain theSameElementsAs names
       
@@ -44,7 +44,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.drawCard
@@ -62,7 +63,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = true
+        awaitingColor = true,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.drawCard
@@ -82,7 +84,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.playCard(5)
@@ -100,7 +103,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.playCard(0)
@@ -119,7 +123,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p1, p2),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.playCard(0)
@@ -143,7 +148,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p1, p2),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.playCard(0)
@@ -153,6 +159,22 @@ class GameStateSpec extends AnyWordSpec with Matchers:
       s2.awaitingColor shouldBe true
       s2.chosenColor shouldBe None
       s2.currentPlayerIndex shouldBe 0
+    }
+
+    "do nothing when awaiting color and playCard is called" in {
+      val p = Player("P1", Vector(Card(Color.Red, Rank.Number(5))))
+      val state = GameState(
+        deck = Deck.empty,
+        discard = Vector(Card(Color.Red, Rank.Number(1))),
+        players = Vector(p),
+        currentPlayerIndex = 0,
+        chosenColor = None,
+        awaitingColor = true,
+        ruleSet = ClassicRuleSet
+      )
+
+      val s2 = state.playCard(0)
+      s2 shouldBe state
     }
   }
 
@@ -165,7 +187,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(Player("P1", Vector.empty)),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.chooseColor("r")
@@ -184,7 +207,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p1, p2),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = true
+        awaitingColor = true,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = afterWild.chooseColor("g")
@@ -201,7 +225,8 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(Player("P1", Vector.empty)),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = true
+        awaitingColor = true,
+        ruleSet = ClassicRuleSet
       )
 
       val s2 = state.chooseColor("invalid")
@@ -219,12 +244,76 @@ class GameStateSpec extends AnyWordSpec with Matchers:
         players = Vector(p),
         currentPlayerIndex = 0,
         chosenColor = None,
-        awaitingColor = false
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
       )
 
       val s = state.toDisplayString
       s should include ("Aktueller Spieler: P1")
       s should include ("Oberste Karte")
       s should include ("Deckgröße")
+    }
+  }
+  
+  "GameState.nextPlayer" should {
+
+    "advance current player cyclically when players are non-empty" in {
+      val p1 = Player("P1", Vector.empty)
+      val p2 = Player("P2", Vector.empty)
+
+      val state = GameState(
+        deck = Deck.empty,
+        discard = Vector.empty,
+        players = Vector(p1, p2),
+        currentPlayerIndex = 0,
+        chosenColor = None,
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
+      )
+
+      val s2 = state.nextPlayer
+      s2.currentPlayerIndex shouldBe 1
+
+      val s3 = s2.nextPlayer
+      s3.currentPlayerIndex shouldBe 0
+    }
+
+    "return the same state when there are no players" in {
+      val state = GameState(
+        deck = Deck.empty,
+        discard = Vector.empty,
+        players = Vector.empty,
+        currentPlayerIndex = 0,
+        chosenColor = None,
+        awaitingColor = false,
+        ruleSet = ClassicRuleSet
+      )
+
+      state.nextPlayer shouldBe state
+    }
+  }
+
+  "GameState.parseColor" should {
+    
+    "parse various color tokens" in {
+      GameState.parseColor("r") shouldBe Some(Color.Red)
+      GameState.parseColor("red") shouldBe Some(Color.Red)
+      GameState.parseColor("rot") shouldBe Some(Color.Red)
+      
+      GameState.parseColor("y") shouldBe Some(Color.Yellow)
+      GameState.parseColor("gelb") shouldBe Some(Color.Yellow)
+
+      GameState.parseColor("g") shouldBe Some(Color.Green)
+      GameState.parseColor("grün") shouldBe Some(Color.Green)
+      GameState.parseColor("gruen") shouldBe Some(Color.Green)
+
+      GameState.parseColor("b") shouldBe Some(Color.Blue)
+      GameState.parseColor("blue") shouldBe Some(Color.Blue)
+      GameState.parseColor("blau") shouldBe Some(Color.Blue)
+    }
+    
+    "return None on unknown token" in {
+      GameState.parseColor("xxx") shouldBe None
+      GameState.parseColor("") shouldBe None
     }
   }
