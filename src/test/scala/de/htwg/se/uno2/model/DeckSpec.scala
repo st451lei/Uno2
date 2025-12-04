@@ -76,6 +76,18 @@ class DeckSpec extends AnyWordSpec with Matchers {
       val d3 = d2.addToBottom(Seq(newCard2))
       d3.cards.last shouldBe newCard2
     }
-  }  
-  
+    
+    "throw on negative draw count" in {
+      val deck = Deck(cards)
+      an[IllegalArgumentException] shouldBe thrownBy {
+        deck.draw(-1)
+      }
+    } 
+    "throw on invalid deal arguments" in {
+      val deck = Deck(cards)
+      an [IllegalArgumentException] shouldBe thrownBy {
+        deck.deal(numPlayers = 2, cardsEach = -1)
+      }
+    }
+  }
 }
