@@ -29,9 +29,10 @@ jobs:
         run: sbt clean coverage test
 
       - name: Upload coverage to Coveralls
-        run: sbr coverageReport coveralls
+        run: sbt coverageReport coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
