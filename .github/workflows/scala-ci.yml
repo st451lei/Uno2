@@ -2,9 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ DesignPattern2 ]
   pull_request:
-    branches: [ main ]
+    branches: [ DesignPattern2 ]
 
 jobs:
   build:
@@ -31,3 +31,4 @@ jobs:
 
       - name: Run tests
         run: sbt test
+
