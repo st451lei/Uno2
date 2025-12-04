@@ -1,4 +1,4 @@
-name: Scala DesignPattern2
+name: Scala CI
 
 on:
   push:
@@ -32,6 +32,7 @@ jobs:
         run: sbr coverageReport coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
