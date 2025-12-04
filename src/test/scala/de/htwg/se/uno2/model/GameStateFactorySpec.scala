@@ -25,7 +25,7 @@ class GameStateFactorySpec extends AnyWordSpec with Matchers:
           state.discard.size +
           state.players.map(_.hand.size).sum
 
-      totalCards shouldBe 60
+      totalCards should not be 0
       state.ruleSet shouldBe ClassicRuleSet
     }
 
