@@ -2,45 +2,56 @@ package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.model._
 import de.htwg.se.uno2.util._
+import scala.util.{Try, Success, Failure}
 
 class DrawCardCommand(controller: Controller) extends Command:
   private var backup: Option[GameState] = None
 
   override def doStep(): Unit =
     backup = controller.currentState
-    controller.drawCardInternal()
+    Try(controller.drawCardInternal()) match
+      case Success(_) => ()
+      case Failure(_) =>
+        backup.foreach(controller.restoreState)
 
   override def undoStep(): Unit =
     backup.foreach(controller.restoreState)
 
   override def redoStep(): Unit =
-    controller.drawCardInternal()
+    Try(controller.drawCardInternal()).getOrElse(())
 
 class PlayCardCommand(controller: Controller, index: Int) extends Command:
   private var backup: Option[GameState] = None
 
   override def doStep(): Unit =
     backup = controller.currentState
-    controller.playCardInternal(index)
+    Try(controller.playCardInternal(index)) match
+      case Success(_) => ()
+      case Failure(_) =>
+        backup.foreach(controller.restoreState)
 
   override def undoStep(): Unit =
     backup.foreach(controller.restoreState)
 
   override def redoStep(): Unit =
-    controller.playCardInternal(index)
+    Try(controller.playCardInternal(index)).getOrElse(())
 
 class ChooseColorCommand(controller:Controller, token: String) extends Command:
   private var backup: Option[GameState] = None
   
   override def doStep(): Unit =
     backup = controller.currentState
-    controller.chooseColorInternal(token)
-    
+    Try(controller.chooseColorInternal(token)) match
+      case Success(_) => ()
+      case Failure(_) =>
+        backup.foreach(controller.restoreState)
+
   override def undoStep(): Unit =
     backup.foreach(controller.restoreState)
     
   override def redoStep(): Unit =
-    controller.chooseColorInternal(token)
+    Try(controller.chooseColorInternal(token)).getOrElse(())
+
 class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Observable:
   
   private var state: Option[GameState] = None
