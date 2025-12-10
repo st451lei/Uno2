@@ -2,9 +2,18 @@ package de.htwg.se.uno2
 
 import de.htwg.se.uno2.model._
 import de.htwg.se.uno2.controller.Controller
-import de.htwg.se.uno2.aview.Tui
+import de.htwg.se.uno2.aview.{Tui, GUI}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-@main def runUnoTui(): Unit =
-  val controller = Controller(ColorOnlyGameStateFactory)
+@main def run(): Unit =
+  val controller = Controller()
   val tui = Tui(controller)
-  tui.run()
+  val gui = new GUI(controller)
+  
+  controller.addObserver(tui)
+  controller.addObserver(gui)
+  
+  Future {
+    tui.run()
+  }

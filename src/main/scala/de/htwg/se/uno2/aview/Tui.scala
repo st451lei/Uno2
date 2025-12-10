@@ -7,7 +7,10 @@ class Tui(controller: Controller) extends BaseTui(controller):
   private var exit = false
   
   override def update: Unit =
+    println()
     println(controller.gameStateToString)
+    println()
+    println("Befehle: play <index>, draw, color <r|y|g|b>, undo, redo, quit")
     
   protected def shouldExit: Boolean = exit
 
