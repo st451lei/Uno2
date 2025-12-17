@@ -2,6 +2,7 @@ package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.model._
 import de.htwg.se.uno2.util._
+import de.htwg.se.uno2.controller.api.ControllerInterface
 import scala.util.{Try, Success, Failure}
 
 class DrawCardCommand(controller: Controller) extends Command:
@@ -52,7 +53,7 @@ class ChooseColorCommand(controller:Controller, token: String) extends Command:
   override def redoStep(): Unit =
     Try(controller.chooseColorInternal(token)).getOrElse(())
 
-class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Observable:
+class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Observable with ControllerInterface:
   
   private var state: Option[GameState] = None
   private var mode: ControllerState = NormalState
@@ -70,9 +71,9 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
     mode = NormalState
     notifyObservers
 
-  def currentState: Option[GameState] = state
+  private[controller] def currentState: Option[GameState] = state
 
-  def restoreState(oldState: GameState): Unit =
+  private[controller] def restoreState(oldState: GameState): Unit =
     state = Some(oldState)
 
     if oldState.isAwaitingColorChoise then

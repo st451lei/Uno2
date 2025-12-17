@@ -1,9 +1,9 @@
 package de.htwg.se.uno2.aview
 
-import de.htwg.se.uno2.controller.Controller
+import de.htwg.se.uno2.controller.api.ControllerInterface
 import scala.util.Try
 
-class Tui(controller: Controller) extends BaseTui(controller):
+class Tui(controller: ControllerInterface) extends BaseTui(controller):
   private var exit = false
   
   override def update: Unit =

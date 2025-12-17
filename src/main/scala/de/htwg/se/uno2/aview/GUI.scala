@@ -1,12 +1,12 @@
 package de.htwg.se.uno2.aview
 
-import de.htwg.se.uno2.controller.Controller
+import de.htwg.se.uno2.controller.api.ControllerInterface
 import de.htwg.se.uno2.util.Observer
 
 import scala.swing.*
 import scala.swing.event.*
 
-class GUI(controller: Controller) extends Frame with Observer:
+class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   title = "UNO - Scala Swing"
   preferredSize = new Dimension(800, 600)
