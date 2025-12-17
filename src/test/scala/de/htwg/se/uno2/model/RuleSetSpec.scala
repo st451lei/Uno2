@@ -1,5 +1,6 @@
 package de.htwg.se.uno2.model
 
+import de.htwg.se.uno2.core.impl.model.{Card, ClassicRuleSet, Color, ColorOnlyRuleSet, Rank}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 

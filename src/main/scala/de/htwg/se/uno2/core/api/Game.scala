@@ -6,4 +6,13 @@ trait Game:
   def chooseColor(token: String): Game
 
   def isAwaitingColorChoise: Boolean
-  def snapshot: GameSnapshot
+  def snapshot: Game.Snapshot
+
+object Game:
+  final case class Snapshot(
+                            currentPlayerName: String,
+                            currentHand: Vector[String],
+                            topDiscard: Option[String],
+                            deckSize: Int,
+                            awaitingColor: Boolean
+                            )

@@ -1,7 +1,7 @@
 package de.htwg.se.uno2.core.impl
 
 import de.htwg.se.uno2.core.api.*
-import de.htwg.se.uno2.model.{DefaultGameStateFactory, GameStateFactory}
+import de.htwg.se.uno2.core.impl.model.{DefaultGameStateFactory, GameStateFactory}
 
 object DefaultGameFactory extends GameFactory:
   private val sf: GameStateFactory = DefaultGameStateFactory

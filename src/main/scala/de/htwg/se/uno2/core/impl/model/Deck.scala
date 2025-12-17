@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2.core.impl.model
 
 import scala.util.Random
 

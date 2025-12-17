@@ -1,7 +1,7 @@
 package de.htwg.se.uno2.core.impl
 
 import de.htwg.se.uno2.core.api.*
-import de.htwg.se.uno2.model.GameState
+import de.htwg.se.uno2.core.impl.model.GameState
 
 final class GameImpl private (private val state: GameState) extends Game:
 
@@ -17,9 +17,9 @@ final class GameImpl private (private val state: GameState) extends Game:
   override def isAwaitingColorChoise: Boolean =
     state.isAwaitingColorChoise
     
-  override def snapshot: GameSnapshot =
+  override def snapshot: Game.Snapshot =
     val cur = state.currentPlayer
-    GameSnapshot(
+    Game.Snapshot(
       currentPlayerName = cur.name,
       currentHand = cur.hand.map(_.toString),
       topDiscard = state.discard.lastOption.map(_.toString),

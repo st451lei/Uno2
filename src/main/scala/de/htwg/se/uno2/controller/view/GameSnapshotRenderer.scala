@@ -1,10 +1,10 @@
 package de.htwg.se.uno2.controller.view
 
-import de.htwg.se.uno2.core.api.GameSnapshot
+import de.htwg.se.uno2.core.api.Game.Snapshot
 
 object GameSnapshotRenderer:
 
-  def render(s: GameSnapshot): String =
+  def render(s: Snapshot): String =
     val handStr = s.currentHand.zipWithIndex
       .map { case (c, i) => s"[$i] $c" }
       .mkString(", ")

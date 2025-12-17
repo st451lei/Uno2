@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2.core.impl.model
 
 trait GameStateFactory:
   def create(names: Seq[String]): GameState
@@ -27,8 +27,8 @@ object DefaultGameStateFactory extends GameStateFactory:
     )
     
   private def fullUnoDeck: Seq[Card] =
-      import de.htwg.se.uno2.model.Color.*
-      import de.htwg.se.uno2.model.Rank.*
+      import Color.*
+      import Rank.*
       val colors = List(Red, Yellow, Green, Blue)
       val numbers = for c <- colors; n <- 0 to 9 yield Card(c, Number(n))
       val actions = for c <- colors; r <- List(Skip, Reverse, DrawTwo) yield Card(c, r)

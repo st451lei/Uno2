@@ -1,5 +1,4 @@
-package de.htwg.se.uno2.model
-
+package de.htwg.se.uno2.core.impl.model
 
 final case class GameState(
   deck: Deck,

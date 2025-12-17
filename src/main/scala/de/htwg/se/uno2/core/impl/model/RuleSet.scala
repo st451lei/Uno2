@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.model
+package de.htwg.se.uno2.core.impl.model
 
 trait RuleSet:
   def canPlayOn(top: Card, next: Card, chosenColor: Option[Color]): Boolean

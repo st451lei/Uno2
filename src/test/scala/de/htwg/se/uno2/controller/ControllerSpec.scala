@@ -1,5 +1,6 @@
 package de.htwg.se.uno2.controller
 
+import de.htwg.se.uno2.core.impl.model.{Card, ClassicRuleSet, Color, Deck, GameState, GameStateFactory, Player, Rank}
 import de.htwg.se.uno2.model.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
