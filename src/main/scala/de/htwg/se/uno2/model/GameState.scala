@@ -70,20 +70,6 @@ final case class GameState(
         case None =>
           this
 
-  def toDisplayString: String =
-    val current = currentPlayer
-    val handStr = current.hand.zipWithIndex
-      .map { case (c, i) => s"[$i] $c"}
-      .mkString(", ")
-    val topCard = discard.lastOption.map(_.toString).getOrElse("Keine Karte")
-    s"""
-       |Aktueller Spieler: ${current.name}
-       |Oberste Karte: $topCard
-       |Hand: $handStr
-       |Deckgröße: ${deck.size}
-       |Befehl: ${if awaitingColor then "color r|y|g|b | quit" else "play <i> | draw | quit"}
-       |""".stripMargin
-
 object GameState:
 
   def parseColor(token: String): Option[Color] =

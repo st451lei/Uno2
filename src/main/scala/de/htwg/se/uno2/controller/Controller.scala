@@ -1,12 +1,14 @@
 package de.htwg.se.uno2.controller
 
-import de.htwg.se.uno2.model._
+import de.htwg.se.uno2.core.api.*
+import de.htwg.se.uno2.core.impl.DefaultGameFactory
 import de.htwg.se.uno2.util._
 import de.htwg.se.uno2.controller.api.ControllerInterface
+import de.htwg.se.uno2.controller.view.GameSnapshotRenderer
 import scala.util.{Try, Success, Failure}
 
-class DrawCardCommand(controller: Controller) extends Command:
-  private var backup: Option[GameState] = None
+private[controller] class DrawCardCommand(controller: Controller) extends Command:
+  private var backup: Option[Game] = None
 
   override def doStep(): Unit =
     backup = controller.currentState
@@ -21,8 +23,8 @@ class DrawCardCommand(controller: Controller) extends Command:
   override def redoStep(): Unit =
     Try(controller.drawCardInternal()).getOrElse(())
 
-class PlayCardCommand(controller: Controller, index: Int) extends Command:
-  private var backup: Option[GameState] = None
+private[controller] class PlayCardCommand(controller: Controller, index: Int) extends Command:
+  private var backup: Option[Game] = None
 
   override def doStep(): Unit =
     backup = controller.currentState
@@ -37,8 +39,8 @@ class PlayCardCommand(controller: Controller, index: Int) extends Command:
   override def redoStep(): Unit =
     Try(controller.playCardInternal(index)).getOrElse(())
 
-class ChooseColorCommand(controller:Controller, token: String) extends Command:
-  private var backup: Option[GameState] = None
+private[controller] class ChooseColorCommand(controller:Controller, token: String) extends Command:
+  private var backup: Option[Game] = None
   
   override def doStep(): Unit =
     backup = controller.currentState
@@ -53,9 +55,9 @@ class ChooseColorCommand(controller:Controller, token: String) extends Command:
   override def redoStep(): Unit =
     Try(controller.chooseColorInternal(token)).getOrElse(())
 
-class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Observable with ControllerInterface:
+class Controller(factory: GameFactory = DefaultGameFactory) extends Observable with ControllerInterface:
   
-  private var state: Option[GameState] = None
+  private var state: Option[Game] = None
   private var mode: ControllerState = NormalState
 
   private val undoManager = new UndoManager
@@ -71,9 +73,9 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
     mode = NormalState
     notifyObservers
 
-  private[controller] def currentState: Option[GameState] = state
+  private[controller] def currentState: Option[Game] = state
 
-  private[controller] def restoreState(oldState: GameState): Unit =
+  private[controller] def restoreState(oldState: Game): Unit =
     state = Some(oldState)
 
     if oldState.isAwaitingColorChoise then
@@ -81,10 +83,7 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
     else
       mode = NormalState
     notifyObservers
-
-  def currentPlayer: Player =
-    state.get.currentPlayer
-    
+  
   def isAwaitingColorChoise: Boolean =
     state.exists(_.isAwaitingColorChoise)
     
@@ -98,13 +97,13 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
     undoManager.doStep(new ChooseColorCommand(this, token))
     
   def gameStateToString: String =
-    state.map(_.toDisplayString).getOrElse("Noch kein Spiel gestartet")
+    state.map(g => GameSnapshotRenderer.render(g.snapshot)).getOrElse("Noch kein Spiel gestartet")
 
   private[controller] def setMode(newMode: ControllerState): Unit =
     mode = newMode
     
   private[controller] def playCardInternal(index: Int): Unit =
-    state = state.map(s => s.playCard(index))
+    state = state.map(_.playCard(index))
 
     if state.exists(_.isAwaitingColorChoise) then
       mode = AwaitingColorState
