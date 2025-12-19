@@ -2,12 +2,14 @@ package de.htwg.se.uno2.aview
 
 import de.htwg.se.uno2.controller.api.ControllerInterface
 import de.htwg.se.uno2.util.Observer
-import de.htwg.se.uno2.core.impl.model._
+import de.htwg.se.uno2.core.impl.model.*
 import de.htwg.se.uno2.core.impl.model.Color
-import de.htwg.se.uno2.core.impl.model.Color._
+import de.htwg.se.uno2.core.impl.model.Color.*
+
 import scala.swing.*
 import scala.swing.event.*
-import java.awt.{Color as AwtColor, Graphics2D, RenderingHints, Font}
+import java.awt.{Font, Graphics2D, RenderingHints, Color as AwtColor}
+import scala.swing.MenuBar.NoMenuBar.revalidate
 
 class GUI(controller: ControllerInterface) extends Frame with Observer:
 
@@ -33,9 +35,8 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       case Rank.WildDrawFour => "W+4"
 
   private val gamePanelCenter = new Panel:
-
+    
     preferredSize = new Dimension(900, 600)
-
     override def paintComponent(g: Graphics2D): Unit =
       super.paintComponent(g)
       
@@ -104,7 +105,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       x += cardWidth + cardGap
       
   title = "UNO - Scala Swing"
-  preferredSize = new Dimension(800, 600)
   
   private val drawButton = new Button("Karte ziehen")
   private val playLabel = new Label("Index der zu spielenden Karte: ")
@@ -135,16 +135,70 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     }) = BorderPanel.Position.South
   }
 
+  private val titleLabel = new Label("Uno2"):
+    font = new Font("Arial", java.awt.Font.BOLD, 48)
+    horizontalAlignment = Alignment.Center
+
+  private val startButton = new Button:
+    text = "Spiel starten"
+    preferredSize = new Dimension(200, 60)
+    font = new Font("Arial", java.awt.Font.BOLD, 24)
+
+  private val startPanel: BorderPanel = new BorderPanel:
+    layout(titleLabel) = BorderPanel.Position.Center
+    layout(new FlowPanel(startButton)) = BorderPanel.Position.South
+
+  private val nameInfoLabel = new Label("Spielernamen eingeben:")
+  private val nameField = new TextField {
+    columns = 30
+  }
+  private val startGameButton = new Button("Spiel mit diesen Spielern starten")
+
+  private val namePanel: BorderPanel = new BorderPanel:
+    layout(new BoxPanel(Orientation.Vertical) {
+      contents += Swing.VStrut(30)
+      contents += nameInfoLabel
+      contents += Swing.VStrut(10)
+      contents += nameField
+      contents += Swing.VStrut(10)
+      contents += startGameButton
+      border = Swing.EmptyBorder(20, 20, 20, 20)
+    }) = BorderPanel.Position.Center
+
   peer.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
 
   override def update: Unit =
     gamePanelCenter.repaint()
 
+  listenTo(startButton)
+  listenTo(startGameButton)
   listenTo(drawButton)
   listenTo(playButton)
   listenTo(colorButton)
 
   reactions += {
+    case ButtonClicked(`startButton`) =>
+      contents = namePanel
+      revalidate()
+      repaint()
+
+    case ButtonClicked(`startGameButton`) =>
+      val raw = nameField.text.trim
+      val names = raw.split("[, ]+").filter(_.nonEmpty).toSeq
+
+      if names.isEmpty then
+        Dialog.showMessage(
+          parent = this,
+          message = "Bitte mindestens einen Spielernamen eingeben.",
+          title = "Eingabefehler",
+          messageType = Dialog.Message.Error
+        )
+      else
+        controller.startGame(names)
+        contents = gamePanel
+        revalidate()
+        repaint()
+
     case ButtonClicked(`drawButton`) =>
       controller.drawCard
 
@@ -165,5 +219,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       controller.chooseColor(colorInput)
     colorField.text = ""
   }
-  
+  contents = startPanel
+  centerOnScreen()
   visible = true
