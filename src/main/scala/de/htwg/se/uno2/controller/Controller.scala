@@ -99,6 +99,20 @@ class Controller(factory: GameStateFactory = DefaultGameStateFactory) extends Ob
   def gameStateToString: String =
     state.map(_.toDisplayString).getOrElse("Noch kein Spiel gestartet")
 
+  def currentGameState: Option[GameState] = state
+
+  def currentHand: Vector[Card] =
+    state.map(_.currentPlayer.hand).getOrElse(Vector.empty)
+
+  def topDiscard: Option[Card] =
+    state.flatMap(_.discard.lastOption) // hängt von deinem GameState ab
+
+  def deckSize: Int =
+    state.map(_.deck.size).getOrElse(0)
+
+  def currentPlayerName: String =
+    state.map(_.currentPlayer.name).getOrElse("-")
+
   private[controller] def setMode(newMode: ControllerState): Unit =
     mode = newMode
     
