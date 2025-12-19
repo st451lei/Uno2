@@ -1,12 +1,13 @@
 package de.htwg.se.uno2.controller.impl
 
-import de.htwg.se.uno2.core.api._
 import de.htwg.se.uno2.core.impl.DefaultGameFactory
-import de.htwg.se.uno2.core.impl.model._
-import de.htwg.se.uno2.util._
-import de.htwg.se.uno2.controller.api.ControllerInterface
+import de.htwg.se.uno2.core.impl.model.*
+import de.htwg.se.uno2.util.*
+import de.htwg.se.uno2.controller.ControllerInterface
 import de.htwg.se.uno2.controller.view.GameSnapshotRenderer
-import scala.util.{Try, Success, Failure}
+import de.htwg.se.uno2.core.{Game, GameFactory}
+
+import scala.util.{Failure, Success, Try}
 
 private[controller] class DrawCardCommand(controller: Controller) extends Command:
   private var backup: Option[Game] = None

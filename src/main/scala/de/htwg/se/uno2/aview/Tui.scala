@@ -1,6 +1,6 @@
 package de.htwg.se.uno2.aview
 
-import de.htwg.se.uno2.controller.api.ControllerInterface
+import de.htwg.se.uno2.controller.ControllerInterface
 import scala.util.Try
 
 class Tui(controller: ControllerInterface) extends BaseTui(controller):

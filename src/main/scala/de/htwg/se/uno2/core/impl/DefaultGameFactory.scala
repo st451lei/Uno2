@@ -1,6 +1,6 @@
 package de.htwg.se.uno2.core.impl
 
-import de.htwg.se.uno2.core.api.*
+import de.htwg.se.uno2.core.{Game, GameFactory}
 import de.htwg.se.uno2.core.impl.model.{DefaultGameStateFactory, GameStateFactory}
 
 object DefaultGameFactory extends GameFactory:

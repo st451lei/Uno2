@@ -1,6 +1,6 @@
 package de.htwg.se.uno2
 
-import de.htwg.se.uno2.controller.api.ControllerInterface
+import de.htwg.se.uno2.controller.ControllerInterface
 import de.htwg.se.uno2.controller.impl.Controller
 import de.htwg.se.uno2.aview.{Tui, GUI}
 import scala.concurrent.Future

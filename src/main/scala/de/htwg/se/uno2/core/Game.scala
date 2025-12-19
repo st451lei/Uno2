@@ -1,6 +1,7 @@
-package de.htwg.se.uno2.core.api
+package de.htwg.se.uno2.core
 
-import de.htwg.se.uno2.core.impl.model._
+import de.htwg.se.uno2.core.Game
+import de.htwg.se.uno2.core.impl.model.*
 
 trait Game():
   def drawCard: Game

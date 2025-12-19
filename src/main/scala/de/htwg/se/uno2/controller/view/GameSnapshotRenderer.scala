@@ -1,6 +1,6 @@
 package de.htwg.se.uno2.controller.view
 
-import de.htwg.se.uno2.core.api.Game.Snapshot
+import de.htwg.se.uno2.core.Game.Snapshot
 
 object GameSnapshotRenderer:
 

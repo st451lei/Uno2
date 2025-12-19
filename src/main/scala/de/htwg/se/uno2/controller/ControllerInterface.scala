@@ -1,4 +1,4 @@
-package de.htwg.se.uno2.controller.api
+package de.htwg.se.uno2.controller
 
 import de.htwg.se.uno2.core.impl.model.Card
 import de.htwg.se.uno2.util.Observer
