@@ -1,5 +1,6 @@
 package de.htwg.se.uno2.controller.api
 
+import de.htwg.se.uno2.core.impl.model.Card
 import de.htwg.se.uno2.util.Observer
 
 trait ControllerInterface:
@@ -17,3 +18,8 @@ trait ControllerInterface:
   
   def isAwaitingColorChoise: Boolean
   def gameStateToString: String
+
+  def currentHand: Vector[Card]
+  def topDiscard: Option[Card]
+  def deckSize: Int
+  def currentPlayerName: String

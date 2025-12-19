@@ -11,7 +11,7 @@ final case class GameState(
   ):
 
   def currentPlayer: Player = players(currentPlayerIndex)
-
+  
   def isAwaitingColorChoise: Boolean = awaitingColor
 
   def nextPlayer: GameState =
@@ -68,7 +68,19 @@ final case class GameState(
           )
         case None =>
           this
+  
+  def currentHand: Vector[Card] =
+    currentPlayer.hand
 
+  def topDiscard: Option[Card] =
+    discard.lastOption
+
+  def deckSize: Int =
+    deck.size
+
+  def currentPlayerName: String =
+    currentPlayer.name
+    
 object GameState:
 
   def parseColor(token: String): Option[Color] =

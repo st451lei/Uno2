@@ -1,7 +1,7 @@
 package de.htwg.se.uno2.core.impl
 
 import de.htwg.se.uno2.core.api.*
-import de.htwg.se.uno2.core.impl.model.GameState
+import de.htwg.se.uno2.core.impl.model.{Card, Deck, GameState, Player}
 
 final class GameImpl private (private val state: GameState) extends Game:
 
@@ -26,6 +26,24 @@ final class GameImpl private (private val state: GameState) extends Game:
       deckSize = state.deck.size,
       awaitingColor = state.isAwaitingColorChoise
     )
+  override def currentPlayer: Player =
+    state.currentPlayer
+    
+  override def currentHand: Vector[Card] =
+    state.currentHand
+    
+  override def topDiscard: Option[Card] =
+    state.topDiscard
 
+  override def deckSize: Int =
+    state.deckSize
+
+  override def currentPlayerName: String =
+    state.currentPlayerName
+    
+  override def deck: Deck =
+    state.deck
+  override def discard: Vector[Card] =
+    state.discard
 object GameImpl:
   def apply(gs: GameState): Game = new GameImpl(gs)

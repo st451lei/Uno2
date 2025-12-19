@@ -1,7 +1,8 @@
 package de.htwg.se.uno2.controller.impl
 
-import de.htwg.se.uno2.core.api.*
+import de.htwg.se.uno2.core.api._
 import de.htwg.se.uno2.core.impl.DefaultGameFactory
+import de.htwg.se.uno2.core.impl.model._
 import de.htwg.se.uno2.util._
 import de.htwg.se.uno2.controller.api.ControllerInterface
 import de.htwg.se.uno2.controller.view.GameSnapshotRenderer
@@ -83,6 +84,9 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
     else
       mode = NormalState
     notifyObservers
+
+  def currentPlayer: Player =
+    state.get.currentPlayer
   
   def isAwaitingColorChoise: Boolean =
     state.exists(_.isAwaitingColorChoise)
@@ -98,7 +102,19 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
     
   def gameStateToString: String =
     state.map(g => GameSnapshotRenderer.render(g.snapshot)).getOrElse("Noch kein Spiel gestartet")
+    
+  def currentHand: Vector[Card] =
+    state.map(_.currentHand).getOrElse(Vector.empty)
 
+  def topDiscard: Option[Card] =
+    state.flatMap(_.topDiscard)
+
+  def deckSize: Int =
+    state.map(_.deckSize).getOrElse(0)
+
+  def currentPlayerName: String =
+    state.map(_.currentPlayerName).getOrElse("-")  
+    
   private[controller] def setMode(newMode: ControllerState): Unit =
     mode = newMode
     
