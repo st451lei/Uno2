@@ -13,6 +13,7 @@ import scala.swing.MenuBar.NoMenuBar.revalidate
 
 class GUI(controller: ControllerInterface) extends Frame with Observer:
 
+  title = "UNO2"
   private val cardWidth = 80
   private val cardHeight = 120
   private val cardGap = 15
@@ -103,8 +104,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       g.drawString(s"[$idx]", x + 10, y + cardHeight - 10)
 
       x += cardWidth + cardGap
-      
-  title = "UNO - Scala Swing"
   
   private val drawButton = new Button("Karte ziehen")
   private val playLabel = new Label("Index der zu spielenden Karte: ")
