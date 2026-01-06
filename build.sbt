@@ -7,6 +7,7 @@ lazy val root = (project in file("."))
     version := "0.1.0",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-      "org.scala-lang.modules" %% "scala-swing" % "3.0.0"
+      "org.scala-lang.modules" %% "scala-swing" % "3.0.0",
+      "net.codingwell" %% "scala-guice" % "7.0.0"
     )
   )
