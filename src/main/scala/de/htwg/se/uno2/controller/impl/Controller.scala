@@ -1,5 +1,6 @@
 package de.htwg.se.uno2.controller.impl
 
+import com.google.inject.Inject
 import de.htwg.se.uno2.core.impl.DefaultGameFactory
 import de.htwg.se.uno2.core.impl.model.*
 import de.htwg.se.uno2.util.*
@@ -57,7 +58,7 @@ private[controller] class ChooseColorCommand(controller:Controller, token: Strin
   override def redoStep(): Unit =
     Try(controller.chooseColorInternal(token)).getOrElse(())
 
-class Controller(factory: GameFactory = DefaultGameFactory) extends Observable with ControllerInterface:
+class Controller @Inject() (factory: GameFactory) extends Observable with ControllerInterface:
 
   private var state: Option[Game] = None
   private var mode: ControllerState = NormalState
@@ -148,3 +149,6 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
     mode = NormalState
 
     notifyObservers
+
+object Controller:
+  def default: Controller = new Controller(DefaultGameFactory)
