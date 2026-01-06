@@ -8,12 +8,18 @@ import de.htwg.se.uno2.core.impl.model.Color.*
 
 import scala.swing.*
 import scala.swing.event.*
-import java.awt.{Font, Graphics2D, RenderingHints, Color as AwtColor}
+import java.awt.{Rectangle, Font, Graphics2D, RenderingHints, Color as AwtColor}
 import scala.swing.MenuBar.NoMenuBar.revalidate
+
 
 class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   title = "UNO2"
+  private var handHitboxes: Vector[(Int, Rectangle)] = Vector.empty
+  private var deckRect: Rectangle = new Rectangle(0, 0, 0, 0)
+
+  private var hoveredIndex: Option[Int] = None
+  private val selectedIndex: Option[Int] = None
   private val cardWidth = 80
   private val cardHeight = 120
   private val cardGap = 15
@@ -40,16 +46,45 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     preferredSize = new Dimension(900, 600)
     override def paintComponent(g: Graphics2D): Unit =
       super.paintComponent(g)
-      
+
       g.setRenderingHint(
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_ON
       )
-      
-      g.setColor(new AwtColor(0, 120, 0)) // dunkelgrün wie Spielfeld
+
+      g.setColor(new AwtColor(0, 120, 0))
       g.fillRect(0, 0, size.width, size.height)
       
       val hand = controller.currentHand
+      val y = size.height - cardHeight - 40
+      val startX = 40
+
+      handHitboxes = hand.zipWithIndex.map { case (card, idx) =>
+        val x = startX + idx * (cardWidth + cardGap)
+        val rect = new Rectangle(x,y, cardWidth, cardHeight)
+
+        g.setColor(AwtColor.LIGHT_GRAY)
+        g.fillRoundRect(x, y, cardWidth, cardHeight, 14, 14)
+        g.setColor(AwtColor.BLACK)
+        g.drawRoundRect(x, y, cardWidth, cardHeight, 14, 14)
+
+        g.setFont(new Font("Arial", Font.PLAIN, 12))
+        g.drawString(s"[$idx]", x + 6, y + cardHeight - 8)
+
+        if hoveredIndex.contains(idx) || selectedIndex.contains(idx) then
+          g.setColor(AwtColor.WHITE)
+          g.drawRoundRect(x - 2, y - 2, cardWidth + 4, cardHeight + 4, 14, 14)
+
+        (idx, rect)
+      }
+
+      val deckX = 60
+      val deckY = size.height/2 - cardHeight/2
+      deckRect = new Rectangle(deckX, deckY, cardWidth, cardHeight)
+
+      g.setColor(AwtColor.DARK_GRAY)
+      g.fillRoundRect(deckX, deckY, cardWidth, cardHeight, 14, 14)
+
       val top = controller.topDiscard
       val deckCount = controller.deckSize
       val player = controller.currentPlayerName
@@ -169,6 +204,8 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   override def update: Unit =
     gamePanelCenter.repaint()
 
+  listenTo(gamePanelCenter.mouse.clicks)
+  listenTo(gamePanelCenter.mouse.moves)
   listenTo(startButton)
   listenTo(startGameButton)
   listenTo(drawButton)
@@ -176,6 +213,23 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   listenTo(colorButton)
 
   reactions += {
+
+    case e: MouseMoved =>
+      val p = e.point
+      val newHover = handHitboxes.collectFirst { case (idx, rect) if rect.contains(p) => idx}
+      if newHover != hoveredIndex then
+        hoveredIndex = newHover
+        gamePanelCenter.repaint()
+
+    case e: MousePressed =>
+      val p = e.point
+
+      if deckRect.contains(p) then
+        controller.drawCard
+      else
+        val hit = handHitboxes.collectFirst { case (idx, rect) if rect.contains(p) => idx}
+        hit.foreach(controller.playCard)
+
     case ButtonClicked(`startButton`) =>
       contents = namePanel
       revalidate()
