@@ -140,10 +140,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
       x += cardWidth + cardGap
   
-  private val drawButton = new Button("Karte ziehen")
-  private val playLabel = new Label("Index der zu spielenden Karte: ")
-  private val playField = new TextField { columns = 5 }
-  private val playButton = new Button("Karte spielen")
 
   private val colorLabel = new Label("Farbe wählen (r/g/b/y): ")
   private val colorField = new TextField { columns = 5}
@@ -153,14 +149,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     layout(new ScrollPane(gamePanelCenter)) = BorderPanel.Position.Center
 
     layout(new GridPanel(3,1) {
-      contents += new FlowPanel(drawButton)
-
-      contents += new FlowPanel(
-        playLabel,
-        playField,
-        playButton
-      )
-
+      
       contents += FlowPanel(
         colorLabel,
         colorField,
@@ -208,8 +197,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   listenTo(gamePanelCenter.mouse.moves)
   listenTo(startButton)
   listenTo(startGameButton)
-  listenTo(drawButton)
-  listenTo(playButton)
   listenTo(colorButton)
 
   reactions += {
@@ -251,21 +238,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         contents = gamePanel
         revalidate()
         repaint()
-
-    case ButtonClicked(`drawButton`) =>
-      controller.drawCard
-
-    case ButtonClicked(`playButton`) =>
-      val indexText = playField.text.trim
-      if indexText.nonEmpty then
-        try
-          val idx = indexText.toInt
-          controller.playCard(idx)
-        catch
-          case _: NumberFormatException =>
-            ()
-      playField.text = ""
-
+      
     case ButtonClicked(`colorButton`) =>
     val colorInput = colorField.text.trim
     if colorInput.nonEmpty then
