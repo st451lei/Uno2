@@ -23,6 +23,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private val cardWidth = 80
   private val cardHeight = 120
   private val cardGap = 15
+  private var gameOverDialogShown: Boolean = false
 
   private def colorToAwt(c: Color): AwtColor =
     c match
@@ -41,8 +42,21 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       case Rank.Wild => "W"
       case Rank.WildDrawFour => "W+4"
 
+  private def maybeShowGameOverDialog(): Unit =
+    if controller.isGameOver && !gameOverDialogShown then
+      gameOverDialogShown = true
+      val winner = controller.winnerName.getOrElse(controller.currentPlayerName)
+      Dialog.showMessage(
+        parent = this,
+        message = s" $winner hat gewonnen",
+        title = "Spiel beendet",
+        messageType = Dialog.Message.Info
+      )
+    else if !controller.isGameOver then
+      gameOverDialogShown = false
+
   private val gamePanelCenter = new Panel:
-    
+
     preferredSize = new Dimension(900, 600)
     override def paintComponent(g: Graphics2D): Unit =
       super.paintComponent(g)
@@ -54,7 +68,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
       g.setColor(new AwtColor(0, 120, 0))
       g.fillRect(0, 0, size.width, size.height)
-      
+
       val hand = controller.currentHand
       val y = size.height - cardHeight - 40
       val startX = 40
@@ -88,19 +102,33 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       val top = controller.topDiscard
       val deckCount = controller.deckSize
       val player = controller.currentPlayerName
-      
+
       g.setColor(AwtColor.WHITE)
       g.setFont(new Font("Arial", Font.BOLD, 24))
       g.drawString(s"Spieler: $player", 20, 40)
-      
+
       drawDeck(g, deckCount, x = 50, y = size.height / 2 - cardHeight / 2)
-      
+
       drawDiscard(g, top, x = 180, y = size.height / 2 - cardHeight / 2)
-      
+
       drawHand(g, hand, startX = 50, y = size.height - cardHeight - 50)
 
+      if controller.isGameOver then
+        val winner = controller.winnerName.getOrElse(player)
+
+        g.setColor(new AwtColor(0, 0, 0, 170))
+        g.fillRect(0, 0, size.width, size.height)
+
+        g.setColor(AwtColor.WHITE)
+        g.setFont(new Font("Arial", Font.BOLD, 48))
+        val msg = s"$winner gewinnt!"
+        val fm = g.getFontMetrics
+        val x = (size.width - fm.stringWidth(msg)) / 2
+        val y = size.height / 2
+        g.drawString(msg, x, y)
+
   private def drawDeck(g: Graphics2D, count: Int, x: Int, y: Int): Unit =
-    
+
     g.setColor(AwtColor.DARK_GRAY)
     g.fillRoundRect(x, y, cardWidth, cardHeight, 15, 15)
     g.setColor(AwtColor.WHITE)
@@ -134,12 +162,12 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       g.setColor(if c == AwtColor.YELLOW || c == AwtColor.WHITE then AwtColor.BLACK else AwtColor.WHITE)
       g.setFont(new Font("Arial", Font.BOLD, 20))
       g.drawString(rankToString(card), x + 10, y + 30)
-      
+
       g.setFont(new Font("Arial", Font.PLAIN, 12))
       g.drawString(s"[$idx]", x + 10, y + cardHeight - 10)
 
       x += cardWidth + cardGap
-  
+
 
   private val colorLabel = new Label("Farbe wählen (r/g/b/y): ")
   private val colorField = new TextField { columns = 5}
@@ -149,7 +177,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     layout(new ScrollPane(gamePanelCenter)) = BorderPanel.Position.Center
 
     layout(new GridPanel(3,1) {
-      
+
       contents += FlowPanel(
         colorLabel,
         colorField,
@@ -191,6 +219,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   peer.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
 
   override def update: Unit =
+    maybeShowGameOverDialog()
     gamePanelCenter.repaint()
 
   listenTo(gamePanelCenter.mouse.clicks)
@@ -238,12 +267,12 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         contents = gamePanel
         revalidate()
         repaint()
-      
+
     case ButtonClicked(`colorButton`) =>
-    val colorInput = colorField.text.trim
-    if colorInput.nonEmpty then
-      controller.chooseColor(colorInput)
-    colorField.text = ""
+      val colorInput = colorField.text.trim
+      if colorInput.nonEmpty then
+        controller.chooseColor(colorInput)
+      colorField.text = ""
   }
   contents = startPanel
   centerOnScreen()
