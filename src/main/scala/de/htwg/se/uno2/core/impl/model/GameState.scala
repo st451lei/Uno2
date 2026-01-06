@@ -7,20 +7,47 @@ final case class GameState(
   currentPlayerIndex: Int,
   chosenColor: Option[Color],
   awaitingColor: Boolean,
-  ruleSet: RuleSet
+  ruleSet: RuleSet,
+  direction: Int = 1,
+  pendingWild: Option[Rank] = None,
+  winnerName: Option[String] = None
   ):
+
+  def isGameOver: Boolean = winnerName.isDefined
 
   def currentPlayer: Player = players(currentPlayerIndex)
   
   def isAwaitingColorChoise: Boolean = awaitingColor
 
+  private def normIndex(i: Int): Int =
+    if players.isEmpty then 0
+    else ((i % players.size) + players.size) % players.size
+
+  private def nextIndex(steps: Int = 1, dir: Int = direction): Int =
+    if players.isEmpty then 0
+    else normIndex(currentPlayerIndex + steps * dir)
+
+  private def advance(steps: Int, dir: Int = direction): GameState =
+    if players.isEmpty then this
+    else copy(currentPlayerIndex = nextIndex(steps, dir))
+
+  private def giveCards(playerIdx: Int, n: Int): GameState =
+    if players.isEmpty || n <= 0 then this
+    else
+      val (cardsDrawn, d2) = deck.draw(n)
+      val p = players(playerIdx)
+      copy(
+        deck = d2,
+        players = players.updated(playerIdx, p.copy(hand = p.hand ++ cardsDrawn))
+      )
+
   def nextPlayer: GameState =
     if players.nonEmpty then
-      copy(currentPlayerIndex = (currentPlayerIndex + 1) % players.size)
+      advance(1)
     else this
 
   def drawCard: GameState =
-    if awaitingColor then this
+    if isAwaitingColorChoise || isGameOver then this
     else
       val (c, d2) = deck.draw()
       val cur = currentPlayer
@@ -31,7 +58,7 @@ final case class GameState(
       )
 
   def playCard(index: Int): GameState =
-    if awaitingColor then this
+    if isAwaitingColorChoise || isGameOver then this
     else if index < 0 || index >= currentPlayer.hand.size then this
     else
       val (card, newPl) = currentPlayer.playAt(index)
@@ -42,30 +69,65 @@ final case class GameState(
         val newDiscard = discard :+ card
         val newPlayers = players.updated(currentPlayerIndex, newPl)
 
-        card.rank match
+        val base = copy(
+          discard = newDiscard,
+          players = newPlayers,
+          chosenColor = None,
+          awaitingColor = false,
+          pendingWild = None
+        )
+
+        if newPl.hand.isEmpty then
+          base.copy(
+            winnerName = Some(newPl.name),
+            awaitingColor = false,
+            chosenColor = None,
+            pendingWild = None
+          )
+        else card.rank match
           case Rank.Wild | Rank.WildDrawFour =>
-            copy(
-              discard = newDiscard,
-              players = newPlayers,
-              chosenColor = None,
-              awaitingColor = true
-            )
-          case _ =>
-            nextPlayer.copy(
-              discard = newDiscard,
-              players = newPlayers,
+            base.copy(
+              awaitingColor = true,
+              pendingWild = Some(card.rank),
               chosenColor = None
             )
+          case Rank.Skip =>
+            base.advance(2)
+          case Rank.DrawTwo =>
+            val target = base.nextIndex(1)
+            base.giveCards(target, 2).advance(2)
+          case Rank.Reverse =>
+            val newDir = direction * -1
+            val afterFlip = base.copy(direction = newDir)
+            if players.size <= 1 then afterFlip
+            else if players.size == 2 then
+              afterFlip.advance(2, dir = newDir)
+            else
+              afterFlip.advance(1, dir = newDir)
+          case _ =>
+            base.advance(1)
 
   def chooseColor(token: String): GameState =
-    if !awaitingColor then this
+    if !awaitingColor || isGameOver then this
     else
       GameState.parseColor(token) match
         case Some(col) =>
-          nextPlayer.copy(
+          val base = copy(
             chosenColor = Some(col),
             awaitingColor = false
           )
+          pendingWild match
+            case Some(Rank.WildDrawFour) => 
+              val target = base.nextIndex(1)
+              base
+                .giveCards(target, 4)
+                .copy(pendingWild = None)
+                .advance(2)
+
+            case Some(Rank.Wild) | None =>
+              base.copy(pendingWild = None).advance(1)
+            case Some(_) =>
+              base.copy(pendingWild = None).advance(1)
         case None =>
           this
   

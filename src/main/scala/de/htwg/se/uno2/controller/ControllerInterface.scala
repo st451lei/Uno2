@@ -17,6 +17,8 @@ trait ControllerInterface:
   def redo(): Unit
   
   def isAwaitingColorChoise: Boolean
+  def isGameOver: Boolean
+  def winnerName: Option[String]
   def gameStateToString: String
 
   def currentHand: Vector[Card]

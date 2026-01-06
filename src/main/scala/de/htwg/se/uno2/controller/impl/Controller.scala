@@ -43,7 +43,7 @@ private[controller] class PlayCardCommand(controller: Controller, index: Int) ex
 
 private[controller] class ChooseColorCommand(controller:Controller, token: String) extends Command:
   private var backup: Option[Game] = None
-  
+
   override def doStep(): Unit =
     backup = controller.currentState
     Try(controller.chooseColorInternal(token)) match
@@ -53,12 +53,12 @@ private[controller] class ChooseColorCommand(controller:Controller, token: Strin
 
   override def undoStep(): Unit =
     backup.foreach(controller.restoreState)
-    
+
   override def redoStep(): Unit =
     Try(controller.chooseColorInternal(token)).getOrElse(())
 
 class Controller(factory: GameFactory = DefaultGameFactory) extends Observable with ControllerInterface:
-  
+
   private var state: Option[Game] = None
   private var mode: ControllerState = NormalState
 
@@ -88,22 +88,28 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
 
   def currentPlayer: Player =
     state.get.currentPlayer
-  
+
   def isAwaitingColorChoise: Boolean =
     state.exists(_.isAwaitingColorChoise)
-    
+
+  def isGameOver: Boolean =
+    state.exists(_.isGameOver)
+
+  def winnerName: Option[String] =
+    state.flatMap(_.winnerName)
+
   def drawCard: Unit =
-    undoManager.doStep(new DrawCardCommand(this))
-    
+    if !isGameOver then undoManager.doStep(new DrawCardCommand(this))
+
   def playCard(index: Int): Unit =
-    undoManager.doStep(new PlayCardCommand(this, index))
-    
+    if !isGameOver then undoManager.doStep(new PlayCardCommand(this, index))
+
   def chooseColor(token: String): Unit =
-    undoManager.doStep(new ChooseColorCommand(this, token))
-    
+    if !isGameOver then undoManager.doStep(new ChooseColorCommand(this, token))
+
   def gameStateToString: String =
     state.map(g => GameSnapshotRenderer.render(g.snapshot)).getOrElse("Noch kein Spiel gestartet")
-    
+
   def currentHand: Vector[Card] =
     state.map(_.currentHand).getOrElse(Vector.empty)
 
@@ -114,11 +120,11 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
     state.map(_.deckSize).getOrElse(0)
 
   def currentPlayerName: String =
-    state.map(_.currentPlayerName).getOrElse("-")  
-    
+    state.map(_.currentPlayerName).getOrElse("-")
+
   private[controller] def setMode(newMode: ControllerState): Unit =
     mode = newMode
-    
+
   private[controller] def playCardInternal(index: Int): Unit =
     state = state.map(_.playCard(index))
 
@@ -128,17 +134,17 @@ class Controller(factory: GameFactory = DefaultGameFactory) extends Observable w
       mode = NormalState
 
     notifyObservers
-    
+
   private[controller] def chooseColorInternal(token: String): Unit =
     state = state.map(_.chooseColor(token))
-    
+
     mode = NormalState
-    
+
     notifyObservers
-    
+
   private[controller] def drawCardInternal(): Unit =
     state = state.map(_.drawCard)
-    
+
     mode = NormalState
-    
-    notifyObservers  
+
+    notifyObservers

@@ -9,6 +9,8 @@ trait Game():
   def chooseColor(token: String): Game
 
   def isAwaitingColorChoise: Boolean
+  def isGameOver: Boolean
+  def winnerName: Option[String]
   def snapshot: Game.Snapshot
   def currentPlayer: Player
   def currentHand: Vector[Card]
@@ -23,5 +25,6 @@ object Game:
                             currentHand: Vector[String],
                             topDiscard: Option[String],
                             deckSize: Int,
-                            awaitingColor: Boolean
+                            awaitingColor: Boolean,
+                            winnerName: Option[String]
                             )

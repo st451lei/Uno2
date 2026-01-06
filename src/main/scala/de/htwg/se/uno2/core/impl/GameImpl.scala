@@ -24,10 +24,17 @@ final class GameImpl private (private val state: GameState) extends Game:
       currentHand = cur.hand.map(_.toString),
       topDiscard = state.discard.lastOption.map(_.toString),
       deckSize = state.deck.size,
-      awaitingColor = state.isAwaitingColorChoise
+      awaitingColor = state.isAwaitingColorChoise,
+      winnerName = state.winnerName
     )
   override def currentPlayer: Player =
     state.currentPlayer
+  
+  override def isGameOver: Boolean =
+    state.isGameOver
+
+  override def winnerName: Option[String] =
+    state.winnerName
     
   override def currentHand: Vector[Card] =
     state.currentHand

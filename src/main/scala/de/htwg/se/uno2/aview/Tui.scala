@@ -10,7 +10,11 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
     println()
     println(controller.gameStateToString)
     println()
-    println("Befehle: play <index>, draw, color <r|y|g|b>, undo, redo, quit")
+    if controller.isGameOver then
+      println("Spiel beendet.")
+      exit = true
+    else
+     println("Befehle: play <index>, draw, color <r|y|g|b>, undo, redo, quit")
     
   protected def shouldExit: Boolean = exit
 
