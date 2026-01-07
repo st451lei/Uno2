@@ -8,6 +8,9 @@ import de.htwg.se.uno2.controller.ControllerInterface
 import de.htwg.se.uno2.controller.view.GameSnapshotRenderer
 import de.htwg.se.uno2.core.{Game, GameFactory}
 
+import de.htwg.se.uno2.fileio.FileIOInterface
+import de.htwg.se.uno2.fileio.xml.XmlFileIO
+
 import scala.util.{Failure, Success, Try}
 
 private[controller] class DrawCardCommand(controller: Controller) extends Command:
@@ -58,12 +61,12 @@ private[controller] class ChooseColorCommand(controller:Controller, token: Strin
   override def redoStep(): Unit =
     Try(controller.chooseColorInternal(token)).getOrElse(())
 
-class Controller @Inject() (factory: GameFactory) extends Observable with ControllerInterface:
+class Controller @Inject() (factory: GameFactory, fileIO: FileIOInterface) extends Observable with ControllerInterface:
 
   private var state: Option[Game] = None
   private var mode: ControllerState = NormalState
 
-  private val undoManager = new UndoManager
+  private var undoManager = new UndoManager
 
   def undo(): Unit =
     undoManager.undoStep()
@@ -74,7 +77,21 @@ class Controller @Inject() (factory: GameFactory) extends Observable with Contro
   def startGame(names: Seq[String]): Unit =
     state = Some(factory.create(names))
     mode = NormalState
+    undoManager = new UndoManager
     notifyObservers
+    
+  def save(): Unit =
+    state.foreach(g => fileIO.save(g.gameState))
+    
+  def load(): Unit =
+    fileIO.load() match
+      case Some(gs) =>
+        restoreState(GameImpl(gs))
+        undoManager = new UndoManager
+      case None =>
+        ()
+        
+  
 
   private[controller] def currentState: Option[Game] = state
 
@@ -151,4 +168,4 @@ class Controller @Inject() (factory: GameFactory) extends Observable with Contro
     notifyObservers
 
 object Controller:
-  def default: Controller = new Controller(DefaultGameFactory)
+  def default: Controller = new Controller(DefaultGameFactory, new XmlFileIO)

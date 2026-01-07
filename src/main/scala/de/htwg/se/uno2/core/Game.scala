@@ -7,7 +7,7 @@ trait Game():
   def drawCard: Game
   def playCard(index: Int): Game
   def chooseColor(token: String): Game
-
+  def gameState: GameState
   def isAwaitingColorChoise: Boolean
   def isGameOver: Boolean
   def winnerName: Option[String]

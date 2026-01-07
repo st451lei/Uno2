@@ -13,6 +13,9 @@ trait ControllerInterface:
   def playCard(index: Int): Unit
   def chooseColor(token: String): Unit
   
+  def save(): Unit
+  def load(): Unit
+  
   def undo(): Unit
   def redo(): Unit
   

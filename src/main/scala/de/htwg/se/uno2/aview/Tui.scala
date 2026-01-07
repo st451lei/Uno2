@@ -14,7 +14,7 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
       println("Spiel beendet.")
       exit = true
     else
-     println("Befehle: play <index>, draw, color <r|y|g|b>, undo, redo, quit")
+     println("Befehle: play <index>, draw, color <r|y|g|b>, save, load, undo, redo, quit")
     
   protected def shouldExit: Boolean = exit
 
@@ -31,12 +31,14 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
         else
           println("Verwendung: color r|y|g|b")
 
+      case "save" => 
+        controller.save()
+      case "load" => 
+        controller.load()
       case "undo" =>
         controller.undo()
-
       case "redo" =>
         controller.redo()
-
       case _ =>
         controller.chooseColor("")
         
@@ -54,9 +56,12 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
         else
           println("Verwendung: play <index>")
 
+      case "save" =>
+        controller.save()
+      case "load" =>
+        controller.load()
       case "undo" =>
         controller.undo()
-
       case "redo" =>
         controller.redo()
 
@@ -64,7 +69,7 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
         print("Jetzt keine Farbauswahl nötig")
 
       case _ =>
-        println("Unbekannter Befehl. (play <index>, draw, undo, redo, quit)")
+        println("Unbekannter Befehl. (play <index>, draw, save, load, undo, redo, quit)")
   
 
   protected def askPlayers(): Seq[String] =

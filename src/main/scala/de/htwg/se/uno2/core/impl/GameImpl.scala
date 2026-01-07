@@ -5,6 +5,8 @@ import de.htwg.se.uno2.core.impl.model.{Card, Deck, GameState, Player}
 
 final class GameImpl private (private val state: GameState) extends Game:
 
+  override def gameState: GameState = state
+  
   override def drawCard: Game =
     GameImpl(state.drawCard)
     
@@ -52,5 +54,6 @@ final class GameImpl private (private val state: GameState) extends Game:
     state.deck
   override def discard: Vector[Card] =
     state.discard
+    
 object GameImpl:
   def apply(gs: GameState): Game = new GameImpl(gs)

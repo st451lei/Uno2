@@ -19,9 +19,9 @@ object GameSnapshotRenderer:
       if s.winnerName.isDefined then
         "Spiel ist vorbei. (quit | undo | redo)"
       else if s.awaitingColor then
-        "color r|y|g|b | undo | redo | quit"
+        "color r|y|g|b | save | load | undo | redo | quit"
       else
-        "play <i> | draw | undo | redo | quit"
+        "play <i> | draw | save | load | undo | redo | quit"
 
     s"""
        |Aktueller Spieler: ${s.currentPlayerName}
