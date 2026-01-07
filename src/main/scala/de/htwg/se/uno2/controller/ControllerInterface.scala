@@ -11,6 +11,8 @@ trait ControllerInterface:
   
   def drawCard: Unit
   def playCard(index: Int): Unit
+  def endTurn(): Unit
+  def canEndTurn: Boolean
   def chooseColor(token: String): Unit
   
   def save(): Unit

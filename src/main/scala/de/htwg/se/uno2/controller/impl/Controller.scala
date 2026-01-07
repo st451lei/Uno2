@@ -44,6 +44,22 @@ private[controller] class PlayCardCommand(controller: Controller, index: Int) ex
 
   override def redoStep(): Unit =
     Try(controller.playCardInternal(index)).getOrElse(())
+    
+private[controller] class EndTurnCommand(controller: Controller) extends Command:
+  private var backup: Option[Game] = None
+  
+  override def doStep(): Unit =
+    backup = controller.currentState
+    Try(controller.endTurnInternal()) match
+      case Success(_) => ()
+      case Failure(_) =>
+        backup.foreach(controller.restoreState)
+        
+  override def undoStep(): Unit =
+    backup.foreach(controller.restoreState)
+    
+  override def redoStep(): Unit =
+    Try(controller.endTurnInternal()).getOrElse(())  
 
 private[controller] class ChooseColorCommand(controller:Controller, token: String) extends Command:
   private var backup: Option[Game] = None
@@ -121,7 +137,13 @@ class Controller @Inject() (factory: GameFactory, fileIO: FileIOInterface) exten
 
   def playCard(index: Int): Unit =
     if !isGameOver then undoManager.doStep(new PlayCardCommand(this, index))
-
+    
+  def canEndTurn: Boolean =
+    state.exists(_.gameState.canEndTurn)
+    
+  def endTurn(): Unit =
+    if !isGameOver then undoManager.doStep(new EndTurnCommand(this))  
+  
   def chooseColor(token: String): Unit =
     if !isGameOver then undoManager.doStep(new ChooseColorCommand(this, token))
 
@@ -152,7 +174,13 @@ class Controller @Inject() (factory: GameFactory, fileIO: FileIOInterface) exten
       mode = NormalState
 
     notifyObservers
+    
+  private[controller] def endTurnInternal(): Unit =
+    state = state.map(_.endTurn)
+    mode = NormalState
 
+    notifyObservers
+    
   private[controller] def chooseColorInternal(token: String): Unit =
     state = state.map(_.chooseColor(token))
 

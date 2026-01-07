@@ -6,6 +6,7 @@ import de.htwg.se.uno2.core.impl.model.*
 trait Game():
   def drawCard: Game
   def playCard(index: Int): Game
+  def endTurn: Game
   def chooseColor(token: String): Game
   def gameState: GameState
   def isAwaitingColorChoise: Boolean

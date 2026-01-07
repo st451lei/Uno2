@@ -12,6 +12,9 @@ final class GameImpl private (private val state: GameState) extends Game:
     
   override def playCard(index: Int): Game =
     GameImpl(state.playCard(index))
+
+  override def endTurn: Game =
+    GameImpl(state.endTurn)
     
   override def chooseColor(token: String): Game =
     GameImpl(state.chooseColor(token))

@@ -19,7 +19,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private var deckRect: Rectangle = new Rectangle(0, 0, 0, 0)
 
   private var hoveredIndex: Option[Int] = None
-  private val selectedIndex: Option[Int] = None
+  private var selectedIndices: Set[Int] = Set.empty
   private val cardWidth = 80
   private val cardHeight = 120
   private val cardGap = 15
@@ -85,7 +85,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         g.setFont(new Font("Arial", Font.PLAIN, 12))
         g.drawString(s"[$idx]", x + 6, y + cardHeight - 8)
 
-        if hoveredIndex.contains(idx) || selectedIndex.contains(idx) then
+        if hoveredIndex.contains(idx) || selectedIndices.contains(idx) then
           g.setColor(AwtColor.WHITE)
           g.drawRoundRect(x - 2, y - 2, cardWidth + 4, cardHeight + 4, 14, 14)
 
@@ -172,11 +172,13 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private val colorLabel = new Label("Farbe wählen (r/g/b/y): ")
   private val colorField = new TextField { columns = 5}
   private val colorButton = new Button("Farbe setzen")
+  private val endTurnButton = new Button("Zug beenden")
 
   private val gamePanel: BorderPanel = new BorderPanel {
     layout(new ScrollPane(gamePanelCenter)) = BorderPanel.Position.Center
 
     layout(new GridPanel(3,1) {
+      contents += FlowPanel(endTurnButton)
 
       contents += FlowPanel(
         colorLabel,
@@ -220,6 +222,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   override def update: Unit =
     maybeShowGameOverDialog()
+
     gamePanelCenter.repaint()
 
   listenTo(gamePanelCenter.mouse.clicks)
@@ -227,6 +230,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   listenTo(startButton)
   listenTo(startGameButton)
   listenTo(colorButton)
+  listenTo(endTurnButton)
 
   reactions += {
 
@@ -273,6 +277,9 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       if colorInput.nonEmpty then
         controller.chooseColor(colorInput)
       colorField.text = ""
+
+    case ButtonClicked(`endTurnButton`) =>
+      controller.endTurn()
   }
   contents = startPanel
   centerOnScreen()
