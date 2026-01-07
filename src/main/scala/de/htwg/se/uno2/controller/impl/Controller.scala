@@ -7,7 +7,7 @@ import de.htwg.se.uno2.util.*
 import de.htwg.se.uno2.controller.ControllerInterface
 import de.htwg.se.uno2.controller.view.GameSnapshotRenderer
 import de.htwg.se.uno2.core.{Game, GameFactory}
-
+import de.htwg.se.uno2.core.impl.GameImpl
 import de.htwg.se.uno2.fileio.FileIOInterface
 import de.htwg.se.uno2.fileio.xml.XmlFileIO
 
