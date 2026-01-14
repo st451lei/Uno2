@@ -1,0 +1,33 @@
+<uno2>
+  <meta>
+    <ruleSet>colorOnly</ruleSet>
+    <currentPlayerIndex>1</currentPlayerIndex>
+    <direction>-1</direction>
+    <awaitingColor>true</awaitingColor>
+    <chosenColor>Blue</chosenColor>
+    <pendingWild>WildDrawFour</pendingWild>
+    <winnerName>A</winnerName>
+  </meta>
+  <deck>
+    <card color="Red" kind="Number" n="1"/>
+    <card color="Black" kind="WildDrawFour" n=""/>
+    <card color="Blue" kind="Skip" n=""/>
+  </deck>
+  <discard>
+    <card color="Green" kind="Number" n="9"/>
+    <card color="Yellow" kind="DrawTwo" n=""/>
+  </discard>
+  <players>
+    <player name="A">
+      <hand>
+        <card color="Red" kind="Reverse" n=""/>
+        <card color="Black" kind="Wild" n=""/>
+      </hand>
+    </player>
+    <player name="B">
+      <hand>
+        <card color="Blue" kind="Number" n="7"/>
+      </hand>
+    </player>
+  </players>
+</uno2>

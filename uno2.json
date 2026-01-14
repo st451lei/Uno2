@@ -1,0 +1,61 @@
+{
+  "deck" : [ {
+    "color" : "Red",
+    "rank" : {
+      "kind" : "Number",
+      "n" : 1
+    }
+  }, {
+    "color" : "Black",
+    "rank" : {
+      "kind" : "WildDrawFour"
+    }
+  }, {
+    "color" : "Blue",
+    "rank" : {
+      "kind" : "Skip"
+    }
+  } ],
+  "discard" : [ {
+    "color" : "Green",
+    "rank" : {
+      "kind" : "Number",
+      "n" : 9
+    }
+  }, {
+    "color" : "Yellow",
+    "rank" : {
+      "kind" : "DrawTwo"
+    }
+  } ],
+  "players" : [ {
+    "name" : "A",
+    "hand" : [ {
+      "color" : "Red",
+      "rank" : {
+        "kind" : "Reverse"
+      }
+    }, {
+      "color" : "Black",
+      "rank" : {
+        "kind" : "Wild"
+      }
+    } ]
+  }, {
+    "name" : "B",
+    "hand" : [ {
+      "color" : "Blue",
+      "rank" : {
+        "kind" : "Number",
+        "n" : 7
+      }
+    } ]
+  } ],
+  "currentPlayerIndex" : 1,
+  "chosenColor" : "Blue",
+  "awaitingColor" : true,
+  "ruleSet" : "colorOnly",
+  "direction" : -1,
+  "pendingWild" : "WildDrawFour",
+  "winnerName" : "A"
+}
