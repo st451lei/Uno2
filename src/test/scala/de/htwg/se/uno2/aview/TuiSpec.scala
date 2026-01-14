@@ -1,174 +1,161 @@
 package de.htwg.se.uno2.aview
 
-import de.htwg.se.uno2.controller.Controller
-import de.htwg.se.uno2.core.impl.model.{Card, ClassicRuleSet, Color, Deck, GameState, GameStateFactory, Player, Rank}
-import de.htwg.se.uno2.model.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
+import de.htwg.se.uno2.controller.ControllerInterface
+import de.htwg.se.uno2.core.impl.model.Card
+import de.htwg.se.uno2.util.Observer
 
-class TuiSpec extends AnyWordSpec with Matchers:
+import java.io.ByteArrayInputStream
 
-  class TestTui(controller: Controller) extends Tui(controller):
-    def testInput(cmd: String): String =
-      val out = new ByteArrayOutputStream()
-      Console.withOut(PrintStream(out)):
+final class TuiSpec extends AnyWordSpec with Matchers {
 
-        this.processInput(cmd)
-      out.toString
+  final class SpyController extends ControllerInterface {
+    var startedWith: Option[Seq[String]] = None
 
-  class ExposedTui(contoller: Controller) extends Tui(contoller):
-    def callHandleNormal(input:String): Unit = handleNormalInput(input)
-    def callHandleAwaiting(input: String): Unit = handleAwaitingColorInput(input)
-    def callHandleQuitPublic(): Unit = handleQuit()
-    def exited: Boolean = shouldExit
+    var drawCalls = 0
+    var playCalls: Vector[Int] = Vector.empty
+    var endTurnCalls = 0
+    var chooseCalls: Vector[String] = Vector.empty
 
-    override protected def askPlayers(): Seq[String] = Seq("A", "B")
+    var saveCalls = 0
+    var loadCalls = 0
+    var undoCalls = 0
+    var redoCalls = 0
 
-  extension (t: Tui)
-    def processInput(input: String): Unit =
-      val trimmed = input.trim
-      if t.controller.isAwaitingColorChoise then
-        trimmed.toLowerCase match
-          case s if s.startsWith("color") =>
-            val p = s.split("\\s+")
-            if p.length >= 2 then t.controller.chooseColor(p(1))
-            else println("Verwendung: color r|y|g|b")
-          case "quit" => println("Spiel beendet.")
-          case _ => t.controller.chooseColor("")
-      else
-        trimmed match
-          case "quit" => println("Spiel beendet.")
-          case "draw" => t.controller.drawCard
-          case s if s.startsWith("play") =>
-            val p = s.split("\\s+")
-            if p.length == 2 then
-              p(1).toIntOption match
-                case Some(i) => t.controller.playCard(i)
-                case _       => println("Ungültiger Index.")
-            else println("Verwendung: play <index>")
-          case s if s.startsWith("color") =>
-            println("Jetzt keine Farbauswahl nötig.")
-          case _ =>
-            println("Unbekannter Befehl. (play <index>, draw, quit)")
+    var awaitingColor: Boolean = false
+    var gameOver: Boolean = false
 
-  "A TUI" should {
+    override def addObserver(o: Observer): Unit = ()
+    override def removeObserver(o: Observer): Unit = ()
 
-    "receive update() when controller notifies observers" in {
-      val controller = new Controller
-      val tui = new TestTui(controller)
+    override def startGame(names: Seq[String]): Unit = startedWith = Some(names)
 
-      val out = new ByteArrayOutputStream()
-      Console.withOut(PrintStream(out)):
-        controller.startGame(Seq("A", "B"))
+    override def drawCard: Unit = drawCalls += 1
+    override def playCard(index: Int): Unit = playCalls = playCalls :+ index
+    override def endTurn(): Unit = endTurnCalls += 1
+    override def canEndTurn: Boolean = true
+    override def chooseColor(token: String): Unit = chooseCalls = chooseCalls :+ token
 
-      out.toString should include ("Aktueller Spieler: A")
+    override def save(): Unit = saveCalls += 1
+    override def load(): Unit = loadCalls += 1
+
+    override def undo(): Unit = undoCalls += 1
+    override def redo(): Unit = redoCalls += 1
+
+    override def isAwaitingColorChoise: Boolean = awaitingColor
+    override def isGameOver: Boolean = gameOver
+    override def winnerName: Option[String] = None
+    override def gameStateToString: String = "STATE"
+
+    override def currentHand: Vector[Card] = Vector.empty
+    override def topDiscard: Option[Card] = None
+    override def deckSize: Int = 0
+    override def currentPlayerName: String = "P"
+  }
+
+  final class ExposedTui(c: ControllerInterface) extends Tui(c) {
+    def normal(input: String): Unit = handleNormalInput(input)
+    def awaiting(input: String): Unit = handleAwaitingColorInput(input)
+    def playersFromInput(in: String): Seq[String] =
+      Console.withIn(new ByteArrayInputStream(in.getBytes("UTF-8"))) {
+        askPlayers()
+      }
+  }
+
+  "Tui.handleNormalInput" should {
+
+    "call drawCard on 'draw'" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      tui.normal("draw")
+      c.drawCalls shouldBe 1
     }
 
-    "print error on unknown command" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new TestTui(controller)
+    "call playCard on 'play <index>'" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
 
-      val result = tui.testInput("foobar")
-      result should include ("Unbekannter Befehl")
+      tui.normal("play 2")
+      c.playCalls shouldBe Vector(2)
     }
 
-    "execute draw command" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val oldHandSize = controller.currentPlayer.hand.size
+    "not call playCard when index is invalid" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
 
-      val tui = new TestTui(controller)
-      tui.testInput("draw")
-
-      controller.currentPlayer.hand.size shouldBe oldHandSize + 1
+      tui.normal("play abc")
+      c.playCalls shouldBe Vector.empty
     }
 
-    "reject invalid play command index" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new TestTui(controller)
+    "route save/load/undo/redo commands" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
 
-      val out = tui.testInput("play 99")
-      out should include ("")
-      controller.currentPlayer.hand.size shouldBe 7
-    }
-    "handleNormalInput draw correctly" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new ExposedTui(controller)
+      tui.normal("save")
+      tui.normal("load")
+      tui.normal("undo")
+      tui.normal("redo")
 
-      val before = controller.currentPlayer.hand.size
-      tui.callHandleNormal("draw")
-      controller.currentPlayer.hand.size shouldBe before + 1
-    }
-
-    "handleNormalInput print error on invalid index" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new ExposedTui(controller)
-
-      val out = new ByteArrayOutputStream()
-      Console.withOut(PrintStream(out)):
-        tui.callHandleNormal("play foo")
-
-      out.toString should include ("Ungültiger Index.")
-    }
-
-    "handleNormalInput print hint when color is not expected" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new ExposedTui(controller)
-
-      val out = new ByteArrayOutputStream()
-      Console.withOut(PrintStream(out)):
-        tui.callHandleNormal("color r")
-
-      out.toString should include ("Jetzt keine Farbauswahl nötig")
-    }
-
-    "handleAwaitingColorInput choose color or fallback" in {
-      val top  = Card(Color.Red, Rank.Number(5))
-      val wild = Card(Color.Black, Rank.Wild)
-      val p1   = Player("P1", Vector.empty)
-      val p2   = Player("P2", Vector.empty)
-
-      val baseState = GameState(
-        deck = Deck.empty,
-        discard = Vector(top, wild),
-        players = Vector(p1, p2),
-        currentPlayerIndex = 0,
-        chosenColor = None,
-        awaitingColor = true,
-        ruleSet = ClassicRuleSet
-      )
-
-      val factory = new GameStateFactory:
-        override def create(names: Seq[String]): GameState = baseState
-
-      val controller = new Controller(factory)
-      controller.startGame(Seq("P1", "P2"))
-      val tui = new ExposedTui(controller)
-
-      controller.isAwaitingColorChoise shouldBe true
-      tui.callHandleAwaiting("color g")
-      controller.isAwaitingColorChoise shouldBe false
-    }
-
-    "handleQuit set exit flag and print message" in {
-      val controller = new Controller
-      controller.startGame(Seq("A", "B"))
-      val tui = new ExposedTui(controller)
-
-      val out = new ByteArrayOutputStream()
-      Console.withOut(PrintStream(out)):
-        tui.callHandleQuitPublic()
-
-      out.toString should include ("Spiel beendet")
-      tui.exited shouldBe true
+      c.saveCalls shouldBe 1
+      c.loadCalls shouldBe 1
+      c.undoCalls shouldBe 1
+      c.redoCalls shouldBe 1
     }
   }
 
+  "Tui.handleAwaitingColorInput" should {
+
+    "accept 'color r' and call chooseColor('r')" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      tui.awaiting("color r")
+      c.chooseCalls shouldBe Vector("r")
+    }
+
+    "route save/load/undo/redo while awaiting color" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      tui.awaiting("save")
+      tui.awaiting("load")
+      tui.awaiting("undo")
+      tui.awaiting("redo")
+
+      c.saveCalls shouldBe 1
+      c.loadCalls shouldBe 1
+      c.undoCalls shouldBe 1
+      c.redoCalls shouldBe 1
+    }
+
+    "fallback to chooseColor(\"\") on unknown input" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      tui.awaiting("???")
+      c.chooseCalls shouldBe Vector("")
+    }
+  }
+
+  "Tui.askPlayers" should {
+
+    "parse names from stdin" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      val names = tui.playersFromInput("Ann Ben\n")
+      names shouldBe Seq("Ann", "Ben")
+    }
+
+    "use default players on empty input" in {
+      val c = new SpyController
+      val tui = new ExposedTui(c)
+
+      val names = tui.playersFromInput("\n")
+      names shouldBe Seq("Player1", "Player2")
+    }
+  }
+}
