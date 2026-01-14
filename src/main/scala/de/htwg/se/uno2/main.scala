@@ -21,10 +21,6 @@ import scala.swing.Swing
   controller.addObserver(tui)
   controller.addObserver(gui)
 
-  Swing.onEDT {
-    gui.visible = true
-  }
-
   Future {
     tui.run()
   }

@@ -24,7 +24,8 @@ class JsonFileIO extends FileIOInterface:
                                     ruleSet: String,
                                     direction: Int,
                                     pendingWild: Option[String],
-                                    winnerName: Option[String]
+                                    winnerName: Option[String],
+                                    pendingNumber: Option[Int]
                                   )
 
   private given OFormat[RankData] = Json.format[RankData]
@@ -58,7 +59,8 @@ class JsonFileIO extends FileIOInterface:
       ruleSet = ruleSetToString(gs.ruleSet),
       direction = gs.direction,
       pendingWild = gs.pendingWild.map(rankToString),
-      winnerName = gs.winnerName
+      winnerName = gs.winnerName,
+      pendingNumber= gs.pendingNumber
     )
 
   private def fromData(d: GameStateData): GameState =
@@ -72,7 +74,8 @@ class JsonFileIO extends FileIOInterface:
       ruleSet = ruleSetFromString(d.ruleSet),
       direction = d.direction,
       pendingWild = d.pendingWild.map(rankFromString),
-      winnerName = d.winnerName
+      winnerName = d.winnerName,
+      pendingNumber = d.pendingNumber
     )
 
   private def cardToData(c: Card): CardData =

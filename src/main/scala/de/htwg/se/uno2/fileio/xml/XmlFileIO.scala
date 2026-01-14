@@ -33,6 +33,7 @@ class XmlFileIO extends FileIOInterface:
         <chosenColor>{gs.chosenColor.map(_.toString).getOrElse("")}</chosenColor>
         <pendingWild>{gs.pendingWild.map(rankToString).getOrElse("")}</pendingWild>
         <winnerName>{gs.winnerName.getOrElse("")}</winnerName>
+        <pendingNumber>{gs.pendingNumber.map(_.toString).getOrElse("")}</pendingNumber>
       </meta>
 
       <deck>
@@ -76,6 +77,11 @@ class XmlFileIO extends FileIOInterface:
     val deckCards = (root \ "deck" \ "card").map(cardFromXml).toVector
     val discard   = (root \ "discard" \ "card").map(cardFromXml).toVector
     val players   = (root \ "players" \ "player").map(playerFromXml).toVector
+    
+    val pendingNumber =
+      txt("pendingNumber") match
+        case "" => None
+        case s => Some(s.toInt)
 
     GameState(
       deck = Deck(deckCards),
@@ -87,7 +93,8 @@ class XmlFileIO extends FileIOInterface:
       ruleSet = rs,
       direction = dir,
       pendingWild = pendingWild,
-      winnerName = winnerName
+      winnerName = winnerName,
+      pendingNumber = pendingNumber
     )
 
   private def cardToXml(c: Card): Elem =

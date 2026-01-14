@@ -173,11 +173,14 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private val colorField = new TextField { columns = 5}
   private val colorButton = new Button("Farbe setzen")
   private val endTurnButton = new Button("Zug beenden")
+  private val saveButton = new Button("Speichern")
+  private val loadButton = new Button("Laden")
 
   private val gamePanel: BorderPanel = new BorderPanel {
     layout(new ScrollPane(gamePanelCenter)) = BorderPanel.Position.Center
 
     layout(new GridPanel(3,1) {
+      contents += FlowPanel(saveButton, loadButton /*, ioStatusLabel */)
       contents += FlowPanel(endTurnButton)
 
       contents += FlowPanel(
@@ -221,9 +224,18 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   peer.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
 
   override def update: Unit =
-    maybeShowGameOverDialog()
+    Swing.onEDT {
+      val hasGame = controller.currentPlayerName != "-"
+      saveButton.enabled = hasGame
+      endTurnButton.enabled = controller.canEndTurn
 
-    gamePanelCenter.repaint()
+      val awaiting = controller.isAwaitingColorChoise
+      colorField.enabled = awaiting
+      colorButton.enabled = awaiting
+
+      maybeShowGameOverDialog()
+      gamePanelCenter.repaint()
+    }
 
   listenTo(gamePanelCenter.mouse.clicks)
   listenTo(gamePanelCenter.mouse.moves)
@@ -231,6 +243,8 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   listenTo(startGameButton)
   listenTo(colorButton)
   listenTo(endTurnButton)
+  listenTo(saveButton)
+  listenTo(loadButton)
 
   reactions += {
 
@@ -245,7 +259,17 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       val p = e.point
 
       if deckRect.contains(p) then
+        val beforeHand = controller.currentHand.size
         controller.drawCard
+        val afterHand = controller.currentHand.size
+
+        if beforeHand == afterHand then
+          Dialog.showMessage(
+            this,
+            "Du darfst nur ziehen, wenn du keine spielbare Karte hast",
+            "Hinweis", Dialog.Message.Info
+          )
+
       else
         val hit = handHitboxes.collectFirst { case (idx, rect) if rect.contains(p) => idx}
         hit.foreach(controller.playCard)
@@ -280,6 +304,39 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
     case ButtonClicked(`endTurnButton`) =>
       controller.endTurn()
+
+    case ButtonClicked(`saveButton`) =>
+      controller.save()
+      val file = sys.props.getOrElse("fileio", "xml").toLowerCase match
+        case "json" => "uno2.json"
+        case _ => "uno2.xml"
+
+      Dialog.showMessage(
+        parent = this,
+        message = s"Spiel gespeichert (${file}).",
+        title = "Speichern",
+        messageType = Dialog.Message.Info
+      )
+    case ButtonClicked(`loadButton`) =>
+      controller.load()
+
+      if controller.currentPlayerName != "-" then
+        contents = gamePanel
+        revalidate()
+        repaint()
+        Dialog.showMessage(
+          parent = this,
+          message = "Spiel geladen.",
+          title = "Laden",
+          messageType = Dialog.Message.Info
+        )
+      else
+        Dialog.showMessage(
+          parent = this,
+          message = "Laden fehlgeschlagen (keine gültige Speicherdatei gefunden oder Parse-Fehler).",
+          title = "Laden",
+          messageType = Dialog.Message.Warning
+        )
   }
   contents = startPanel
   centerOnScreen()
