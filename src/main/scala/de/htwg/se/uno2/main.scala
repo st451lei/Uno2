@@ -8,8 +8,6 @@ import de.htwg.se.uno2.aview.{Tui, GUI}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.swing.Swing
-
 @main def run(): Unit =
   val injector = Guice.createInjector(new Uno2Module)
   

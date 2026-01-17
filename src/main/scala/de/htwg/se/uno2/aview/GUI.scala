@@ -6,9 +6,10 @@ import de.htwg.se.uno2.core.impl.model.*
 import de.htwg.se.uno2.core.impl.model.Color
 import de.htwg.se.uno2.core.impl.model.Color.*
 
+import java.awt
 import scala.swing.*
 import scala.swing.event.*
-import java.awt.{Rectangle, Font, Graphics2D, RenderingHints, Color as AwtColor}
+import java.awt.{Font, Graphics2D, Rectangle, RenderingHints, Color as AwtColor}
 import scala.swing.MenuBar.NoMenuBar.revalidate
 
 
@@ -19,7 +20,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private var deckRect: Rectangle = new Rectangle(0, 0, 0, 0)
 
   private var hoveredIndex: Option[Int] = None
-  private var selectedIndices: Set[Int] = Set.empty
   private val cardWidth = 80
   private val cardHeight = 120
   private val cardGap = 15
@@ -85,7 +85,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         g.setFont(new Font("Arial", Font.PLAIN, 12))
         g.drawString(s"[$idx]", x + 6, y + cardHeight - 8)
 
-        if hoveredIndex.contains(idx) || selectedIndices.contains(idx) then
+        if hoveredIndex.contains(idx) then
           g.setColor(AwtColor.WHITE)
           g.drawRoundRect(x - 2, y - 2, cardWidth + 4, cardHeight + 4, 14, 14)
 
@@ -112,6 +112,8 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       drawDiscard(g, top, x = 180, y = size.height / 2 - cardHeight / 2)
 
       drawHand(g, hand, startX = 50, y = size.height - cardHeight - 50)
+
+      drawOpponentCounts(g)
 
       if controller.isGameOver then
         val winner = controller.winnerName.getOrElse(player)
@@ -168,11 +170,113 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
       x += cardWidth + cardGap
 
+  private def drawCardStackIcon(g: Graphics2D, x: Int, y: Int, count: Int): Unit =
+    val w = 22
+    val h = 30
+    val offset = 3
+    val layers = math.min(3, math.max(1, (count + 9) / 10))
 
-  private val colorLabel = new Label("Farbe wählen (r/g/b/y): ")
-  private val colorField = new TextField { columns = 5}
-  private val colorButton = new Button("Farbe setzen")
+    for i <- 0 until layers do
+      val xx = x + i * offset
+      val yy = y + i * offset
+      g.setColor(new AwtColor(30, 60, 120))
+      g.fillRoundRect(xx, yy, w, h, 8, 8)
+      g.setColor(AwtColor.WHITE)
+      g.drawRoundRect(xx, yy, w, h, 8, 8)
+
+      g.setFont(new Font("Arial", Font.BOLD, 10))
+      g.drawString("UNO", xx + 4, yy + 16)
+
+    val badgeR = 10
+    val bx = x + w + (layers - 1) * offset - badgeR + 2
+    val by = y - badgeR / 2
+    g.setColor(new AwtColor(200, 30, 30))
+    g.fillOval(bx, by, badgeR * 2, badgeR * 2)
+    g.setColor(AwtColor.WHITE)
+    g.drawOval(bx, by, badgeR * 2, badgeR * 2)
+
+    val txt = count.toString
+    g.setFont(new Font("Arial", Font.BOLD, 11))
+    val fm = g.getFontMetrics
+    val tx = bx + badgeR - fm.stringWidth(txt) / 2
+    val ty = by + badgeR + fm.getAscent / 2 - 1
+    g.drawString(txt, tx, ty)
+    
+  private def drawOpponentCounts(g: Graphics2D): Unit =
+    val opp = controller.opponentCardCounts
+    if opp.nonEmpty then
+      
+      title = "Spieler"
+      val padding = 10
+      val rowH = 38
+      val iconW = 22
+      val iconH = 30
+      val nameGap = 12
+      
+      g.setFont( new Font("Arial", Font.BOLD, 14))
+      val fmTitle = g.getFontMetrics
+      g.setFont(new Font("Arial", Font.PLAIN, 14))
+      val fm = g.getFontMetrics
+      
+      val maxNameW = opp.map { case (n, _) => fm.stringWidth(n)}.max
+      val boxW = padding + iconW + 18 + nameGap + maxNameW + padding
+      val boxH = padding + fmTitle.getHeight + 6 + opp.size * rowH + padding
+
+      val x = size.width - boxW - 30
+      val y = 15
+
+      g.setColor(new AwtColor(0, 0, 0, 140))
+      g.fillRoundRect(x, y, boxW, boxH, 20, 20)
+
+      g.setColor(AwtColor.WHITE)
+      g.setFont(new Font("Arial", Font.BOLD, 15))
+      g.drawString(title, x + padding, y + padding + fmTitle.getAscent)
+      
+      var ry = y + padding + fmTitle.getHeight + 6
+      opp.foreach { case (name, cnt) =>
+        
+        val ix = x + padding
+        val iy = ry + (rowH - iconH) / 2
+        drawCardStackIcon(g, ix, iy, cnt)
+        
+        g.setColor(AwtColor.WHITE)
+        g.setFont(new Font("Arial", Font.PLAIN, 15))
+        val nx = ix + iconW + 18 + nameGap
+        val ny = ry + rowH / 2 + fm.getAscent / 2 - 2
+        g.drawString(name, nx, ny)
+        
+        ry += rowH
+      }
+    
+  private def mkColorSquare(token: String, awt: AwtColor, tip: String): Button =
+    new Button("") {
+      preferredSize = new Dimension(26,26)
+      background = awt
+      tooltip = tip
+      peer.setOpaque(true)
+      peer.setContentAreaFilled(true)
+      peer.setBorderPainted(true)
+      peer.setFocusPainted(false)
+    }
+
+  private def chooseColorWithDialog(token: String, colorName: String): Unit =
+    controller.chooseColor(token)
+
+    Dialog.showMessage(
+      parent = this,
+      message = s"Aktive Farbe: $colorName",
+      title = "Farbe gesetzt",
+      messageType = Dialog.Message.Info
+    )
+    
+  private val colorPromptLabel = new Label("Farbe wählen:")
+  private val redSquare = mkColorSquare("r", AwtColor.RED, "Rot")
+  private val yellowSquare = mkColorSquare("y", AwtColor.YELLOW, "Gelb")
+  private val greenSquare = mkColorSquare("g", AwtColor.GREEN, "Grün")
+  private val blueSquare = mkColorSquare("b", AwtColor.BLUE, "Blau")
+
   private val endTurnButton = new Button("Zug beenden")
+
   private val saveButton = new Button("Speichern")
   private val loadButton = new Button("Laden")
 
@@ -184,9 +288,11 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       contents += FlowPanel(endTurnButton)
 
       contents += FlowPanel(
-        colorLabel,
-        colorField,
-        colorButton
+        colorPromptLabel,
+        redSquare,
+        yellowSquare,
+        greenSquare,
+        blueSquare
       )
     }) = BorderPanel.Position.South
   }
@@ -230,8 +336,10 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       endTurnButton.enabled = controller.canEndTurn
 
       val awaiting = controller.isAwaitingColorChoise
-      colorField.enabled = awaiting
-      colorButton.enabled = awaiting
+      redSquare.enabled = awaiting
+      yellowSquare.enabled = awaiting
+      greenSquare.enabled = awaiting
+      blueSquare.enabled = awaiting
 
       maybeShowGameOverDialog()
       gamePanelCenter.repaint()
@@ -239,10 +347,17 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   listenTo(gamePanelCenter.mouse.clicks)
   listenTo(gamePanelCenter.mouse.moves)
+
   listenTo(startButton)
   listenTo(startGameButton)
-  listenTo(colorButton)
+
+  listenTo(redSquare)
+  listenTo(yellowSquare)
+  listenTo(greenSquare)
+  listenTo(blueSquare)
+
   listenTo(endTurnButton)
+
   listenTo(saveButton)
   listenTo(loadButton)
 
@@ -266,7 +381,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         if beforeHand == afterHand then
           Dialog.showMessage(
             this,
-            "Du darfst nur ziehen, wenn du keine spielbare Karte hast",
+            "Du darfst ziehen, nur wenn du keine spielbare Karte hast",
             "Hinweis", Dialog.Message.Info
           )
 
@@ -296,11 +411,10 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         revalidate()
         repaint()
 
-    case ButtonClicked(`colorButton`) =>
-      val colorInput = colorField.text.trim
-      if colorInput.nonEmpty then
-        controller.chooseColor(colorInput)
-      colorField.text = ""
+    case ButtonClicked(`redSquare`) => chooseColorWithDialog("r", "Rot")
+    case ButtonClicked(`yellowSquare`) => chooseColorWithDialog("y", "Gelb")
+    case ButtonClicked(`greenSquare`) => chooseColorWithDialog("g", "Grün")
+    case ButtonClicked(`blueSquare`) => chooseColorWithDialog("b", "Blau")
 
     case ButtonClicked(`endTurnButton`) =>
       controller.endTurn()
@@ -313,7 +427,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
       Dialog.showMessage(
         parent = this,
-        message = s"Spiel gespeichert (${file}).",
+        message = s"Spiel gespeichert ($file).",
         title = "Speichern",
         messageType = Dialog.Message.Info
       )

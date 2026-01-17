@@ -162,6 +162,24 @@ class Controller @Inject() (factory: GameFactory, fileIO: FileIOInterface) exten
   def currentPlayerName: String =
     state.map(_.currentPlayerName).getOrElse("-")
 
+  def opponentCardCounts: Vector[(String, Int)] =
+    state.map { g =>
+      val gs = g.gameState
+      val players = gs.players
+      val n = players.size
+      if n <= 1 then Vector.empty
+      else
+        val cur = gs.currentPlayerIndex
+        (1 until n).toVector.map { step =>
+          val i = (cur + step) % n
+          val p = players(i)
+          (p.name, p.hand.size)
+        }
+    }.getOrElse(Vector.empty)
+
+  def activeColor: Option[Color] =
+    state.flatMap(_.gameState.chosenColor)
+
   private[controller] def setMode(newMode: ControllerState): Unit =
     mode = newMode
 

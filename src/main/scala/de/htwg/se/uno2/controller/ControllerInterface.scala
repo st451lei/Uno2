@@ -1,6 +1,6 @@
 package de.htwg.se.uno2.controller
 
-import de.htwg.se.uno2.core.impl.model.Card
+import de.htwg.se.uno2.core.impl.model.{Card,Color}
 import de.htwg.se.uno2.util.Observer
 
 trait ControllerInterface:
@@ -30,3 +30,6 @@ trait ControllerInterface:
   def topDiscard: Option[Card]
   def deckSize: Int
   def currentPlayerName: String
+  def opponentCardCounts: Vector[(String, Int)]
+  def activeColor: Option[Color]
+  
