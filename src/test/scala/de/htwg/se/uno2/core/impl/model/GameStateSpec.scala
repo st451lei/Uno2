@@ -38,7 +38,6 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
     )
 
   "GameState.parseColor" should {
-
     "parse multiple aliases" in {
       GameState.parseColor("r") shouldBe Some(Red)
       GameState.parseColor("rot") shouldBe Some(Red)
@@ -52,7 +51,6 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
   }
 
   "GameState.drawCard" should {
-
     "do nothing when awaitingColor or gameOver" in {
       val p = Player("A", Vector.empty)
       val s1 = mkState(Vector(C(Red, Number(1))), C(Blue, Number(0)), Vector(p), awaiting = true)
@@ -84,7 +82,7 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
     }
 
     "play Number sets pendingNumber and enables endTurn; endTurn advances and clears pendingNumber" in {
-      val p0 = Player("A", Vector(C(Red, Number(7))))
+      val p0 = Player("A", Vector(C(Red, Number(7)), C(Blue, Number(9))))
       val p1 = Player("B", Vector.empty)
       val s = mkState(Vector.empty, C(Red, Number(1)), Vector(p0, p1))
 
@@ -119,7 +117,7 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
     }
 
     "Skip advances by 2" in {
-      val p0 = Player("A", Vector(C(Red, Skip)))
+      val p0 = Player("A", Vector(C(Red, Skip), C(Red, Number(9))))
       val p1 = Player("B", Vector.empty)
       val p2 = Player("C", Vector.empty)
       val s = mkState(Vector.empty, C(Red, Number(1)), Vector(p0, p1, p2), cur = 0)
@@ -129,7 +127,7 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
     }
 
     "DrawTwo gives 2 cards to next player and advances by 2" in {
-      val p0 = Player("A", Vector(C(Red, DrawTwo)))
+      val p0 = Player("A", Vector(C(Red, DrawTwo), C(Red, Number(9))))
       val p1 = Player("B", Vector.empty)
       val p2 = Player("C", Vector.empty)
 
@@ -143,7 +141,12 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
     }
 
     "Reverse cases for players<=1, players==2, players>=3" in {
-      val s1 = mkState(Vector.empty, C(Red, Number(1)), Vector(Player("A", Vector(C(Red, Reverse)))), cur = 0)
+      val s1 = mkState(
+        Vector.empty,
+        C(Red, Number(1)),
+        Vector(Player("A", Vector(C(Red, Reverse), C(Red, Number(9))))),
+        cur = 0
+      )
       val r1 = s1.playCard(0)
       r1.direction shouldBe -1
       r1.currentPlayerIndex shouldBe 0
@@ -151,7 +154,10 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
       val s2 = mkState(
         Vector.empty,
         C(Red, Number(1)),
-        Vector(Player("A", Vector(C(Red, Reverse))), Player("B", Vector.empty)),
+        Vector(
+          Player("A", Vector(C(Red, Reverse), C(Red, Number(9)))),
+          Player("B", Vector.empty)
+        ),
         cur = 0
       )
       val r2 = s2.playCard(0)
@@ -162,7 +168,7 @@ final class GameStateSpec extends AnyWordSpec with Matchers {
         Vector.empty,
         C(Red, Number(1)),
         Vector(
-          Player("A", Vector(C(Red, Reverse))),
+          Player("A", Vector(C(Red, Reverse), C(Red, Number(9)))),
           Player("B", Vector.empty),
           Player("C", Vector.empty)
         ),
