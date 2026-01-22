@@ -2,9 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ CI, DesignPattern2 ]
+    branches: [ main, CI, DesignPattern2]
   pull_request:
-    branches: [ CI, DesignPattern2 ]
+    branches: [ main, CI, DesignPattern2]
 
 jobs:
   build:
@@ -32,6 +32,7 @@ jobs:
         run: sbt coverageReport coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
