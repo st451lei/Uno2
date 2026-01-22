@@ -2,16 +2,14 @@ package de.htwg.se.uno2.aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-
 import de.htwg.se.uno2.controller.ControllerInterface
-import de.htwg.se.uno2.core.impl.model.*
+import de.htwg.se.uno2.core.impl.model.{Color, *}
 import de.htwg.se.uno2.core.impl.model.Color.*
 import de.htwg.se.uno2.core.impl.model.Rank.*
 import de.htwg.se.uno2.util.Observer
 
 import scala.swing.*
 import scala.swing.event.*
-
 import java.awt.event.MouseEvent
 import java.awt.{GraphicsEnvironment, Point, Rectangle}
 import java.awt.image.BufferedImage
@@ -66,6 +64,11 @@ final class GUISpec extends AnyWordSpec with Matchers {
     override def topDiscard: Option[Card] = top
     override def deckSize: Int = deck
     override def currentPlayerName: String = current
+
+    override def opponentCardCounts: Vector[(String, Int)] = Vector.empty
+
+    override def activeColor: Option[Color] = None
+    
   }
 
   final class TestGUI(c: ControllerInterface) extends GUI(c) {

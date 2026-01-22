@@ -2,9 +2,8 @@ package de.htwg.se.uno2.aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-
 import de.htwg.se.uno2.controller.ControllerInterface
-import de.htwg.se.uno2.core.impl.model.Card
+import de.htwg.se.uno2.core.impl.model.{Card, Color}
 import de.htwg.se.uno2.util.Observer
 
 import java.io.ByteArrayInputStream
@@ -53,6 +52,10 @@ final class TuiSpec extends AnyWordSpec with Matchers {
     override def topDiscard: Option[Card] = None
     override def deckSize: Int = 0
     override def currentPlayerName: String = "P"
+
+    override def opponentCardCounts: Vector[(String, Int)] = Vector.empty
+
+    override def activeColor: Option[Color] = None
   }
 
   final class ExposedTui(c: ControllerInterface) extends Tui(c) {
