@@ -7,9 +7,9 @@
 Ein UNO-Kartenspiel in Scala mit **TUI** und **GUI**.  
 Architektur mit **MVC**, **Observer Pattern**, **Command Pattern** (Undo/Redo) und **Persistenz** via **JSON/XML**.
 
-#Usage
+Usage
 
-sbt clean
-sbt compile
-sbt test
-sbt run
+sbt clean ->
+sbt compile ->
+sbt test ->
+sbt run ->
