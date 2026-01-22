@@ -12,4 +12,4 @@ Usage
 sbt clean ->
 sbt compile ->
 sbt test ->
-sbt run ->
+sbt run
