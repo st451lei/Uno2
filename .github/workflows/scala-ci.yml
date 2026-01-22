@@ -28,10 +28,11 @@ jobs:
       - name: Run tests with coverage
         run: sbt clean coverage test
 
-      - name: Upload coverage to Coveralls
-        run: sbt coverageReport coveralls
+      - name: Upload coverage to Coveralls (sbt-coveralls)
+        run: sbt -batch coverageReport coveralls
         env:
-          COVERALLS_REPO_token: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
