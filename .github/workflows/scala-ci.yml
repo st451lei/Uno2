@@ -32,7 +32,6 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/scala-3.4.2/scoverage-report/cobertura.xml
-          format: cobertura
+
 
 
