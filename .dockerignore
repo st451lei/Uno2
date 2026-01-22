@@ -1,0 +1,8 @@
+target
+project/target
+.git
+.idea
+.metals
+.bsp
+.DS_Store
+*.log

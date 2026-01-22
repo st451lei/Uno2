@@ -1,3 +1,15 @@
 [![Scala CI](https://github.com/st451lei/Uno2/actions/workflows/scala-ci.yml/badge.svg)](https://github.com/st451lei/Uno2/actions/workflows/scala-ci.yml)
-![Scala](https://img.shields.io/badge/scala-3.3.3-red)
-![Coverage](https://img.shields.io/badge/coverage-100%25-green)
+![Scala](https://img.shields.io/badge/scala-3.4.2-red)
+[![Coverage Status](https://coveralls.io/repos/github/st451lei/Uno2/badge.svg?branch=DesignPattern2)](https://coveralls.io/github/st451lei/Uno2?branch=DesignPattern2)
+
+# Uno2
+
+Ein UNO-Kartenspiel in Scala mit **TUI** und **GUI**.  
+Architektur mit **MVC**, **Observer Pattern**, **Command Pattern** (Undo/Redo) und **Persistenz** via **JSON/XML**.
+
+Usage
+
+sbt clean ->
+sbt compile ->
+sbt test ->
+sbt run ->

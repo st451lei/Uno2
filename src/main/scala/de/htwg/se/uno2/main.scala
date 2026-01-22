@@ -1,10 +1,24 @@
 package de.htwg.se.uno2
 
-import de.htwg.se.uno2.model._
-import de.htwg.se.uno2.controller.Controller
-import de.htwg.se.uno2.aview.Tui
+import com.google.inject.Guice
+import net.codingwell.scalaguice.InjectorExtensions.*
 
-@main def runUnoTui(): Unit =
-  val controller = Controller()
-  val tui = Tui(controller)
-  tui.run()
+import de.htwg.se.uno2.controller.ControllerInterface
+import de.htwg.se.uno2.aview.{Tui, GUI}
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+@main def run(): Unit =
+  val injector = Guice.createInjector(new Uno2Module)
+  
+  val controller: ControllerInterface = injector.instance[ControllerInterface]
+  
+  val tui = new Tui(controller)
+  val gui = new GUI(controller)
+  
+  controller.addObserver(tui)
+  controller.addObserver(gui)
+
+  Future {
+    tui.run()
+  }
