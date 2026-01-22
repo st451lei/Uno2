@@ -10,96 +10,72 @@
     <pendingNumber></pendingNumber>
   </meta>
   <deck>
+    <card color="Yellow" kind="Number" n="2"/>
+    <card color="Red" kind="Number" n="9"/>
     <card color="Blue" kind="Number" n="0"/>
+    <card color="Yellow" kind="Number" n="8"/>
+    <card color="Green" kind="Number" n="0"/>
+    <card color="Blue" kind="Number" n="9"/>
+    <card color="Blue" kind="Number" n="4"/>
+    <card color="Black" kind="Wild" n=""/>
+    <card color="Green" kind="Number" n="1"/>
+    <card color="Blue" kind="Number" n="7"/>
+    <card color="Red" kind="Reverse" n=""/>
+    <card color="Yellow" kind="Number" n="4"/>
+    <card color="Black" kind="WildDrawFour" n=""/>
+    <card color="Yellow" kind="DrawTwo" n=""/>
+    <card color="Red" kind="Number" n="8"/>
+    <card color="Green" kind="Number" n="4"/>
+    <card color="Yellow" kind="Number" n="1"/>
     <card color="Yellow" kind="Reverse" n=""/>
+    <card color="Black" kind="WildDrawFour" n=""/>
+    <card color="Blue" kind="Number" n="6"/>
+    <card color="Blue" kind="Number" n="5"/>
+    <card color="Green" kind="Number" n="3"/>
+    <card color="Black" kind="Wild" n=""/>
+    <card color="Blue" kind="Number" n="2"/>
+    <card color="Red" kind="Number" n="5"/>
+    <card color="Black" kind="Wild" n=""/>
+    <card color="Green" kind="Number" n="7"/>
+    <card color="Yellow" kind="Number" n="6"/>
+    <card color="Red" kind="Number" n="2"/>
+    <card color="Green" kind="Reverse" n=""/>
+    <card color="Red" kind="Number" n="7"/>
+    <card color="Red" kind="Number" n="3"/>
+    <card color="Green" kind="Number" n="8"/>
+    <card color="Blue" kind="Skip" n=""/>
+    <card color="Green" kind="Number" n="2"/>
+    <card color="Green" kind="Number" n="5"/>
+    <card color="Green" kind="Skip" n=""/>
+    <card color="Red" kind="Number" n="1"/>
+    <card color="Yellow" kind="Number" n="0"/>
+    <card color="Red" kind="DrawTwo" n=""/>
+    <card color="Blue" kind="DrawTwo" n=""/>
+    <card color="Red" kind="Number" n="0"/>
+    <card color="Green" kind="Number" n="9"/>
+    <card color="Yellow" kind="Number" n="3"/>
+    <card color="Blue" kind="Number" n="8"/>
+    <card color="Red" kind="Skip" n=""/>
   </deck>
   <discard>
-    <card color="Red" kind="Reverse" n=""/>
-    <card color="Black" kind="WildDrawFour" n=""/>
-    <card color="Yellow" kind="Number" n="0"/>
-    <card color="Yellow" kind="Number" n="3"/>
-    <card color="Yellow" kind="Skip" n=""/>
-    <card color="Yellow" kind="Number" n="2"/>
-    <card color="Yellow" kind="DrawTwo" n=""/>
-    <card color="Yellow" kind="Number" n="9"/>
-    <card color="Yellow" kind="Number" n="4"/>
-    <card color="Yellow" kind="Number" n="6"/>
-    <card color="Yellow" kind="Number" n="1"/>
-    <card color="Green" kind="Number" n="1"/>
-    <card color="Green" kind="Number" n="3"/>
+    <card color="Green" kind="Number" n="6"/>
     <card color="Green" kind="DrawTwo" n=""/>
-    <card color="Green" kind="Number" n="7"/>
-    <card color="Green" kind="Skip" n=""/>
-    <card color="Green" kind="Number" n="0"/>
+    <card color="Black" kind="WildDrawFour" n=""/>
+    <card color="Yellow" kind="Skip" n=""/>
+    <card color="Yellow" kind="Number" n="9"/>
   </discard>
   <players>
-    <player name="eaqdaw">
+    <player name="13">
       <hand>
-        <card color="Green" kind="Number" n="9"/>
-        <card color="Blue" kind="Number" n="9"/>
-        <card color="Black" kind="Wild" n=""/>
-        <card color="Blue" kind="Number" n="6"/>
-      </hand>
-    </player>
-    <player name="adwad">
-      <hand>
-        <card color="Yellow" kind="Number" n="5"/>
-        <card color="Green" kind="Number" n="4"/>
-        <card color="Blue" kind="Number" n="7"/>
-        <card color="Green" kind="Number" n="8"/>
-        <card color="Red" kind="DrawTwo" n=""/>
-        <card color="Black" kind="Wild" n=""/>
-        <card color="Red" kind="Number" n="7"/>
-        <card color="Black" kind="Wild" n=""/>
-        <card color="Blue" kind="Number" n="1"/>
-        <card color="Yellow" kind="Number" n="8"/>
-        <card color="Green" kind="Number" n="2"/>
-        <card color="Red" kind="Number" n="1"/>
-      </hand>
-    </player>
-    <player name="ada">
-      <hand>
-        <card color="Black" kind="WildDrawFour" n=""/>
-        <card color="Green" kind="Number" n="5"/>
-        <card color="Blue" kind="DrawTwo" n=""/>
-        <card color="Blue" kind="Number" n="4"/>
-        <card color="Green" kind="Number" n="6"/>
-        <card color="Blue" kind="Number" n="2"/>
-        <card color="Yellow" kind="Number" n="7"/>
-      </hand>
-    </player>
-    <player name="d">
-      <hand>
-        <card color="Black" kind="WildDrawFour" n=""/>
-        <card color="Red" kind="Number" n="2"/>
-        <card color="Blue" kind="Number" n="5"/>
         <card color="Red" kind="Number" n="6"/>
-      </hand>
-    </player>
-    <player name="a">
-      <hand>
-        <card color="Red" kind="Number" n="5"/>
-        <card color="Red" kind="Number" n="4"/>
-        <card color="Black" kind="WildDrawFour" n=""/>
-        <card color="Blue" kind="Number" n="8"/>
-      </hand>
-    </player>
-    <player name="dadadwad">
-      <hand>
-        <card color="Green" kind="Reverse" n=""/>
         <card color="Black" kind="Wild" n=""/>
         <card color="Blue" kind="Reverse" n=""/>
-        <card color="Red" kind="Number" n="3"/>
-        <card color="Red" kind="Number" n="9"/>
-        <card color="Red" kind="Number" n="8"/>
-      </hand>
-    </player>
-    <player name="eee">
-      <hand>
         <card color="Blue" kind="Number" n="3"/>
-        <card color="Red" kind="Number" n="0"/>
-        <card color="Blue" kind="Skip" n=""/>
-        <card color="Red" kind="Skip" n=""/>
+        <card color="Yellow" kind="Number" n="7"/>
+        <card color="Blue" kind="Number" n="1"/>
+        <card color="Red" kind="Number" n="4"/>
+        <card color="Yellow" kind="Number" n="5"/>
+        <card color="Black" kind="WildDrawFour" n=""/>
       </hand>
     </player>
   </players>

@@ -11,11 +11,25 @@ import scala.swing.*
 import scala.swing.event.*
 import java.awt.{Font, Graphics2D, Rectangle, RenderingHints, Color as AwtColor}
 import scala.swing.MenuBar.NoMenuBar.revalidate
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
+import scala.collection.mutable
 
+final class CardImageCache(basePath: String = "/cards") {
+  private val cache = mutable.Map.empty[String, BufferedImage]
+
+  def image(name: String): BufferedImage =
+    cache.getOrElseUpdate(name, {
+      val is = getClass.getResourceAsStream(s"$basePath/$name")
+      require(is != null, s"Image not found: $basePath/$name")
+      ImageIO.read(is)
+    })
+}
 
 class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   title = "UNO2"
+  private val imgCache = new CardImageCache()
   private var handHitboxes: Vector[(Int, Rectangle)] = Vector.empty
   private var deckRect: Rectangle = new Rectangle(0, 0, 0, 0)
 
@@ -24,6 +38,24 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private val cardHeight = 120
   private val cardGap = 15
   private var gameOverDialogShown: Boolean = false
+
+  private def fileNameFor(card: Card): String =
+    val c = card.color match
+      case Color.Red => "R"
+      case Color.Green => "G"
+      case Color.Blue => "B"
+      case Color.Yellow => "Y"
+      case Color.Black => "W"
+
+    val r = card.rank match
+      case Rank.Number(n) => n.toString
+      case Rank.Skip => "skip"
+      case Rank.Reverse => "reverse"
+      case Rank.DrawTwo => "draw2"
+      case Rank.Wild => "wild"
+      case Rank.WildDrawFour => "draw4"
+
+    s"${c}_$r.png"
 
   private def colorToAwt(c: Color): AwtColor =
     c match
@@ -61,6 +93,14 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     override def paintComponent(g: Graphics2D): Unit =
       super.paintComponent(g)
 
+//      g.setRenderingHint(
+//        RenderingHints.KEY_INTERPOLATION,
+//        RenderingHints.VALUE_INTERPOLATION_BILINEAR
+//      )
+//      g.setRenderingHint(
+//        RenderingHints.KEY_RENDERING,
+//        RenderingHints.VALUE_RENDER_QUALITY
+//      )
       g.setRenderingHint(
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_ON
@@ -131,13 +171,10 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
   private def drawDeck(g: Graphics2D, count: Int, x: Int, y: Int): Unit =
 
-    g.setColor(AwtColor.DARK_GRAY)
-    g.fillRoundRect(x, y, cardWidth, cardHeight, 15, 15)
-    g.setColor(AwtColor.WHITE)
-    g.setFont(new Font("Arial", Font.BOLD, 18))
-    g.drawString("UNO", x + 15, y + cardHeight / 2)
+    g.drawImage(imgCache.image("back.png"), x, y, cardWidth, cardHeight, null)
+
     g.setFont(new Font("Arial", Font.PLAIN, 12))
-    g.drawString(s"$count Karten", x + 5, y + cardHeight - 15)
+    g.drawString(s"$count Karten", x + 5, y + cardHeight + 15)
 
   private def drawDiscard(g: Graphics2D, top: Option[Card], x: Int, y: Int): Unit =
     top match
@@ -147,26 +184,13 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
         g.setColor(AwtColor.WHITE)
         g.drawString("Leer", x + 20, y + cardHeight / 2)
       case Some(card) =>
-        val c = colorToAwt(card.color)
-        g.setColor(c)
-        g.fillRoundRect(x, y, cardWidth, cardHeight, 15, 15)
-        g.setColor(if c == AwtColor.YELLOW || c == AwtColor.WHITE then AwtColor.BLACK else AwtColor.WHITE)
-        g.setFont(new Font("Arial", Font.BOLD, 24))
-        g.drawString(rankToString(card), x + 25, y + cardHeight / 2)
+        g.drawImage(imgCache.image(fileNameFor(card)), x, y, cardWidth, cardHeight, null)
 
   private def drawHand(g: Graphics2D, hand: Vector[Card], startX: Int, y: Int): Unit =
     var x = startX
     for (card, idx) <- hand.zipWithIndex do
-      val c = colorToAwt(card.color)
-      g.setColor(c)
-      g.fillRoundRect(x, y, cardWidth, cardHeight, 15, 15)
-
-      g.setColor(if c == AwtColor.YELLOW || c == AwtColor.WHITE then AwtColor.BLACK else AwtColor.WHITE)
-      g.setFont(new Font("Arial", Font.BOLD, 20))
-      g.drawString(rankToString(card), x + 10, y + 30)
-
-      g.setFont(new Font("Arial", Font.PLAIN, 12))
-      g.drawString(s"[$idx]", x + 10, y + cardHeight - 10)
+      val img = imgCache.image(fileNameFor(card))
+      g.drawImage(img,x,y,cardWidth,cardHeight, null)
 
       x += cardWidth + cardGap
 
@@ -201,23 +225,23 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     val tx = bx + badgeR - fm.stringWidth(txt) / 2
     val ty = by + badgeR + fm.getAscent / 2 - 1
     g.drawString(txt, tx, ty)
-    
+
   private def drawOpponentCounts(g: Graphics2D): Unit =
     val opp = controller.opponentCardCounts
     if opp.nonEmpty then
-      
+
       title = "Spieler"
       val padding = 10
       val rowH = 38
       val iconW = 22
       val iconH = 30
       val nameGap = 12
-      
+
       g.setFont( new Font("Arial", Font.BOLD, 14))
       val fmTitle = g.getFontMetrics
       g.setFont(new Font("Arial", Font.PLAIN, 14))
       val fm = g.getFontMetrics
-      
+
       val maxNameW = opp.map { case (n, _) => fm.stringWidth(n)}.max
       val boxW = padding + iconW + 18 + nameGap + maxNameW + padding
       val boxH = padding + fmTitle.getHeight + 6 + opp.size * rowH + padding
@@ -231,23 +255,23 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       g.setColor(AwtColor.WHITE)
       g.setFont(new Font("Arial", Font.BOLD, 15))
       g.drawString(title, x + padding, y + padding + fmTitle.getAscent)
-      
+
       var ry = y + padding + fmTitle.getHeight + 6
       opp.foreach { case (name, cnt) =>
-        
+
         val ix = x + padding
         val iy = ry + (rowH - iconH) / 2
         drawCardStackIcon(g, ix, iy, cnt)
-        
+
         g.setColor(AwtColor.WHITE)
         g.setFont(new Font("Arial", Font.PLAIN, 15))
         val nx = ix + iconW + 18 + nameGap
         val ny = ry + rowH / 2 + fm.getAscent / 2 - 2
         g.drawString(name, nx, ny)
-        
+
         ry += rowH
       }
-    
+
   private def mkColorSquare(token: String, awt: AwtColor, tip: String): Button =
     new Button("") {
       preferredSize = new Dimension(26,26)
@@ -268,7 +292,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
       title = "Farbe gesetzt",
       messageType = Dialog.Message.Info
     )
-    
+
   private val colorPromptLabel = new Label("Farbe wählen:")
   private val redSquare = mkColorSquare("r", AwtColor.RED, "Rot")
   private val yellowSquare = mkColorSquare("y", AwtColor.YELLOW, "Gelb")
