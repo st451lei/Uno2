@@ -229,8 +229,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
   private def drawOpponentCounts(g: Graphics2D): Unit =
     val opp = controller.opponentCardCounts
     if opp.nonEmpty then
-
-      title = "Spieler"
+      
       val padding = 10
       val rowH = 38
       val iconW = 22
@@ -254,7 +253,7 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
 
       g.setColor(AwtColor.WHITE)
       g.setFont(new Font("Arial", Font.BOLD, 15))
-      g.drawString(title, x + padding, y + padding + fmTitle.getAscent)
+      g.drawString("Spieler", x + padding, y + padding + fmTitle.getAscent)
 
       var ry = y + padding + fmTitle.getHeight + 6
       opp.foreach { case (name, cnt) =>
