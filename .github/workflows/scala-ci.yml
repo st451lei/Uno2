@@ -2,9 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches: [ main, CI, DesignPattern2]
+    branches: [main]
   pull_request:
-    branches: [ main, CI, DesignPattern2]
+    branches: [main]
 
 jobs:
   build:
@@ -12,26 +12,29 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
 
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
-      - name: Run tests with coverage
-        run: sbt clean coverage test
+      - name: Run tests with scoverage
+        run: sbt clean coverage test coverageReport
 
       - name: Upload coverage to Coveralls
-        run: sbt coverageReport coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: scoverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/scala-3.4.2/scoverage-repirt/cobertura.xml
+          format: cobertura
+
 
 
 
