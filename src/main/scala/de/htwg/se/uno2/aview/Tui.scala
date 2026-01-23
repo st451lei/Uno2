@@ -73,7 +73,7 @@ class Tui(controller: ControllerInterface) extends BaseTui(controller):
   
 
   protected def askPlayers(): Seq[String] =
-    println("Spieler eingeben, z.B. 'Ann Ben':")
+    println("Spieler eingeben, z.B. 'Ann Ben'(max. 6):")
     val line  = Option(scala.io.StdIn.readLine()).getOrElse("")
     val names = line.split("[ ,]+").toVector.filter(_.nonEmpty)
     if names.nonEmpty then names else Vector("Player1", "Player2")

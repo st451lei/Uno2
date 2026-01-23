@@ -93,14 +93,6 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     override def paintComponent(g: Graphics2D): Unit =
       super.paintComponent(g)
 
-//      g.setRenderingHint(
-//        RenderingHints.KEY_INTERPOLATION,
-//        RenderingHints.VALUE_INTERPOLATION_BILINEAR
-//      )
-//      g.setRenderingHint(
-//        RenderingHints.KEY_RENDERING,
-//        RenderingHints.VALUE_RENDER_QUALITY
-//      )
       g.setRenderingHint(
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_ON
@@ -320,9 +312,9 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     }) = BorderPanel.Position.South
   }
 
-  private val titleLabel = new Label("Uno2"):
-    font = new Font("Arial", java.awt.Font.BOLD, 48)
-    horizontalAlignment = Alignment.Center
+  private val titleImage: BufferedImage = imgCache.image("start.png")
+  private val titleIcon = new javax.swing.ImageIcon(titleImage)
+  private val titleImageLabel = new Label { icon = titleIcon }
 
   private val startButton = new Button:
     text = "Spiel starten"
@@ -330,10 +322,16 @@ class GUI(controller: ControllerInterface) extends Frame with Observer:
     font = new Font("Arial", java.awt.Font.BOLD, 24)
 
   private val startPanel: BorderPanel = new BorderPanel:
-    layout(titleLabel) = BorderPanel.Position.Center
-    layout(new FlowPanel(startButton)) = BorderPanel.Position.South
+    layout(new BoxPanel(Orientation.Vertical) {
+      contents += Swing.VStrut(20)
+      contents += titleImageLabel
+      contents += Swing.VStrut(20)
+      contents += Swing.VStrut(20)
+      contents += new FlowPanel(startButton)
+      border = Swing.EmptyBorder(20, -20, 20, 20)
+    }) = BorderPanel.Position.Center
 
-  private val nameInfoLabel = new Label("Spielernamen eingeben:")
+  private val nameInfoLabel = new Label("Spielernamen eingeben: (max. 6)")
   private val nameField = new TextField {
     columns = 30
   }
