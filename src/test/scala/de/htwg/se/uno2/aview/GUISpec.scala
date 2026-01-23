@@ -316,6 +316,7 @@ final class GUISpec extends AnyWordSpec with Matchers {
       valueByName[Boolean](gui, "gameOverDialogShown").shouldBe(true)
 
       onEDT { gui.dispose() }
+
     }
   }
 }
