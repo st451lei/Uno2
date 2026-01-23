@@ -6,7 +6,7 @@
     <awaitingColor>true</awaitingColor>
     <chosenColor>Blue</chosenColor>
     <pendingWild>WildDrawFour</pendingWild>
-    <winnerName>TEST_A</winnerName>
+    <winnerName>A</winnerName>
     <pendingNumber></pendingNumber>
   </meta>
   <deck>
@@ -19,13 +19,13 @@
     <card color="Yellow" kind="DrawTwo" n=""/>
   </discard>
   <players>
-    <player name="TEST_A">
+    <player name="A">
       <hand>
         <card color="Red" kind="Reverse" n=""/>
         <card color="Black" kind="Wild" n=""/>
       </hand>
     </player>
-    <player name="TEST_B">
+    <player name="B">
       <hand>
         <card color="Blue" kind="Number" n="7"/>
       </hand>
