@@ -25,13 +25,17 @@ jobs:
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
-      - name: Run tests with coverage
-        run: sbt clean coverage test
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+  
+      - name: Run tests with coverage (GUI enabled)
+        run: xvfb-run -a sbt clean coverage test
 
       - name: Upload coverage to Coveralls (sbt-coveralls)
         run: sbt -batch coverageReport coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
