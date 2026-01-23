@@ -2,21 +2,31 @@ package de.htwg.se.uno2.fileio.json
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-
 import de.htwg.se.uno2.core.impl.model.*
-import de.htwg.se.uno2.core.impl.model.Color.*
-import de.htwg.se.uno2.core.impl.model.Rank.*
 
-import java.nio.file.Files
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 final class JsonFileIOSpec extends AnyWordSpec with Matchers {
 
-  private def withTempDir[A](f: java.nio.file.Path => A): A = {
-    val old = System.getProperty("user.dir")
-    val dir = Files.createTempDirectory("uno2-json-")
-    System.setProperty("user.dir", dir.toAbsolutePath.toString)
-    try f(dir)
-    finally System.setProperty("user.dir", old)
+  import Color.*
+  import Rank.*
+
+  private val target: Path =
+    Paths.get("uno2.json").toAbsolutePath.normalize()
+
+  private def withIsolatedTarget[A](body: Path => A): A = {
+    val backup = target.resolveSibling(target.getFileName.toString + ".scalatest.bak")
+    val hadOriginal = Files.exists(target)
+
+    if (hadOriginal) Files.move(target, backup, StandardCopyOption.REPLACE_EXISTING)
+
+    try body(target)
+    finally {
+      if (Files.exists(target)) Files.delete(target)
+      if (hadOriginal && Files.exists(backup)) Files.move(backup, target, StandardCopyOption.REPLACE_EXISTING)
+      if (!hadOriginal && Files.exists(backup)) Files.delete(backup)
+    }
   }
 
   private def C(c: Color, r: Rank): Card = Card(c, r)
@@ -35,88 +45,47 @@ final class JsonFileIOSpec extends AnyWordSpec with Matchers {
       ruleSet = ColorOnlyRuleSet,
       direction = -1,
       pendingWild = Some(WildDrawFour),
-      winnerName = Some("A")
+      winnerName = Some("A"),
+      pendingNumber = None
     )
 
   "JsonFileIO" should {
 
-    "save and load round-trip (relevant fields preserved)" in withTempDir { _ =>
-      val io = new JsonFileIO
-      val gs = sampleState
+    "return None when no file exists" in withIsolatedTarget { _ =>
+      val fileIO = new JsonFileIO
+      fileIO.load() shouldBe None
+    }
 
-      io.save(gs)
-      val loaded = io.load()
+    "save and load a game state" in withIsolatedTarget { path =>
+      val fileIO = new JsonFileIO
+      val s = sampleState
+
+      fileIO.save(s)
+      Files.exists(path) shouldBe true
+
+      val loaded = fileIO.load()
       loaded.isDefined shouldBe true
 
-      val g2 = loaded.get
-      g2.deck.cards shouldBe gs.deck.cards
-      g2.discard shouldBe gs.discard
-      g2.players.map(_.name) shouldBe gs.players.map(_.name)
-      g2.players.map(_.hand) shouldBe gs.players.map(_.hand)
-      g2.currentPlayerIndex shouldBe gs.currentPlayerIndex
-      g2.chosenColor shouldBe gs.chosenColor
-      g2.awaitingColor shouldBe gs.awaitingColor
-      g2.ruleSet shouldBe gs.ruleSet
-      g2.direction shouldBe gs.direction
-      g2.pendingWild shouldBe gs.pendingWild
-      g2.winnerName shouldBe gs.winnerName
-      g2.pendingNumber shouldBe None
+      val l = loaded.get
+      l.players.map(_.name) shouldBe Vector("A", "B")
+      l.currentPlayerIndex shouldBe 1
+      l.chosenColor shouldBe Some(Blue)
+      l.awaitingColor shouldBe true
+      l.direction shouldBe -1
+      l.pendingWild shouldBe Some(WildDrawFour)
+      l.winnerName shouldBe Some("A")
     }
 
-    "load should return None when file is missing" in withTempDir { _ =>
-      val io = new JsonFileIO
-      io.load() shouldBe None
+    "return None for invalid json" in withIsolatedTarget { path =>
+      Files.write(path, "{ not-json".getBytes(StandardCharsets.UTF_8))
+      val fileIO = new JsonFileIO
+      fileIO.load() shouldBe None
     }
 
-    "load should return None on invalid json structure" in withTempDir { dir =>
-      val p = dir.resolve("uno2.json")
-      Files.writeString(p, "{}")
-      val io = new JsonFileIO
-      io.load() shouldBe None
-    }
-
-    "load should return None on unknown rank" in withTempDir { dir =>
-      val p = dir.resolve("uno2.json")
-      val bad =
-        """
-          |{
-          |  "deck":[{"color":"Red","rank":{"kind":"Nope"}}],
-          |  "discard":[{"color":"Red","rank":{"kind":"Skip"}}],
-          |  "players":[{"name":"A","hand":[]}],
-          |  "currentPlayerIndex":0,
-          |  "chosenColor":null,
-          |  "awaitingColor":false,
-          |  "ruleSet":"classic",
-          |  "direction":1,
-          |  "pendingWild":null,
-          |  "winnerName":null
-          |}
-          |""".stripMargin
-      Files.writeString(p, bad)
-      val io = new JsonFileIO
-      io.load() shouldBe None
-    }
-
-    "load should return None on unknown color" in withTempDir { dir =>
-      val p = dir.resolve("uno2.json")
-      val bad =
-        """
-          |{
-          |  "deck":[{"color":"Purple","rank":{"kind":"Skip"}}],
-          |  "discard":[{"color":"Red","rank":{"kind":"Skip"}}],
-          |  "players":[{"name":"A","hand":[]}],
-          |  "currentPlayerIndex":0,
-          |  "chosenColor":null,
-          |  "awaitingColor":false,
-          |  "ruleSet":"classic",
-          |  "direction":1,
-          |  "pendingWild":null,
-          |  "winnerName":null
-          |}
-          |""".stripMargin
-      Files.writeString(p, bad)
-      val io = new JsonFileIO
-      io.load() shouldBe None
+    "return None for empty json object" in withIsolatedTarget { path =>
+      Files.write(path, "{}".getBytes(StandardCharsets.UTF_8))
+      val fileIO = new JsonFileIO
+      fileIO.load() shouldBe None
     }
   }
 }

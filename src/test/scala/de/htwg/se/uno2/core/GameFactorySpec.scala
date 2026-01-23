@@ -34,7 +34,7 @@ final class GameFactorySpec extends AnyWordSpec with Matchers {
       gs.discard.last.rank should not be Wild
       gs.discard.last.rank should not be WildDrawFour
 
-      val maxDeck = 60 - 7 * 3 - 1
+      val maxDeck = 108 - 7 * 3 - 1
       val minDeck = maxDeck - 8
       gs.deck.size should be <= maxDeck
       gs.deck.size should be >= minDeck

@@ -30,10 +30,11 @@ object DefaultGameStateFactory extends GameStateFactory:
       import Color.*
       import Rank.*
       val colors = List(Red, Yellow, Green, Blue)
-      val numbers = for c <- colors; n <- 0 to 9 yield Card(c, Number(n))
-      val actions = for c <- colors; r <- List(Skip, Reverse, DrawTwo) yield Card(c, r)
+      val zeros = colors.map(c => Card(c, Number(0)))
+      val nonZeros = for c <- colors; n <- 1 to 9; _ <- 1 to 2 yield Card(c, Number(n))
+      val actions = for c <- colors; r <- List(Skip, Reverse, DrawTwo); _ <- 1 to 2 yield Card(c, r)
       val wilds = List.fill(4)(Card(Black, Wild)) ++ List.fill(4)(Card(Black, WildDrawFour))
-      (numbers ++ actions ++ wilds).toVector
+      (zeros ++ nonZeros ++ actions ++ wilds).toVector
       
   private def drawFirstNonWild(d: Deck): (Card, Deck) =
       val (c,d2) = d.draw()
