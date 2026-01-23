@@ -25,13 +25,16 @@ jobs:
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
-      - name: Run tests with coverage (scoverage)
-        run: sbt -batch clean coverage test coverageReport
+      - name: Run tests with coverage
+        run: sbt clean coverage test
 
-      - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload coverage to Coveralls (sbt-coveralls)
+        run: sbt -batch coverageReport coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
 
 
 
